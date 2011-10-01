@@ -24,6 +24,10 @@ def disassemble memory
 	#if 0, using 2 registers. if 1, using a register and a imm5
 	operand2_flag_mask = 0x20 # >> 5
 
+	#jsr vs jsrr flag mask
+	#if 0, jsrr. if 1, jsr
+	jsr_flag_mask = 0x800 # >> 7
+
 	#offset masks
 	#offset masks are always the least significant x bits
 	offset_9_mask = 0x1FF
@@ -31,11 +35,66 @@ def disassemble memory
 	offset_6_mask = 0x3f
 
 	#imm5 mask
+	#always lsb
 	imm5_mask = 0x1F
 
 	#trap vector mask
+	#always lsb
 	trap_vector_mask = 0xFF
 
+	
+	#opcodes
+	add_code = 0x1
+	and_code = 0x5
+	br_code = 0x0
+	jmp_code = 0xC
+	jsr_code = 0x4
+	ld_code = 0x2
+	ldi_code = 0xA
+	ldr_code = 0x6
+	lea_code = 0xE
+	not_code = 0x9
+	rti_code = 0x8
+	st_code = 0x3
+	sti_code = 0xB
+	str_code = 0x7
+	trap_code = 0xF
+
+
+	#opcode strings
+	add_string = "ADD"
+	and_string = "AND"
+	br_string = "BR"
+	jmp_string = "JMP"
+	jsr_string = "JSR"
+	jsrr_string = "JSRR"
+	ld_string = "LD"
+	ldi_string = "LDI"
+	ldr_string = "LDR"
+	lea_string = "LEA"
+	not_string = "NOT"
+	nop_string = "NOP"
+	ret_string = "RET"
+	rti_string = "RTI"
+	st_string = "ST"
+	sti_string = "STI"
+	str_string = "STR"
+	trap_string = "TRAP"
+
+	#other strings
+	n_string = "N"
+	z_string = "Z"
+	p_string = "P"
+	left_bracket_string = "["
+	right_bracket_string = "]"
+	addition_sign_string = "+"
+	not_sign_string = "~"
+	equal_sign_string = "="
+	greater_than_sign_string = ">"
+	less_than_sign_string = "<"
+	cc_string = "cc"
+	comma_string = ","
+	halt_string = "HALT"
 	
 	#a more asm way of saying index counter
 	instruction_ptr = 0x0
@@ -43,7 +102,7 @@ def disassemble memory
 	#give us some table headers
 	puts "addr\tinstruction"
 
-	while memory[instruction_ptr] - 0xFFFF != 0 #or 0xFFFF
+	while memory[instruction_ptr] - 0xFFFF != 0
 		this_instruction = memory[instruction_ptr]
 		
 		opcode = (this_instruction & opcode_mask) >> 12
