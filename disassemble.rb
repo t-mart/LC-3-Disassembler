@@ -13,16 +13,16 @@ def disassemble memory
 	#destination/base and source register masks
 	reg1_mask = 0xE00 #the register found at bits 11 through 9
 	reg2_mask = 0x1C0 #the register found at bit 8 through 6
-	reg3_mask = 0x7 #the reigster found at bits 2 through 0
+	reg3_mask = 0x7 #the register found at bits 2 through 0
 
 	#condition code masks
-	br_n_mask = 0x800
-	br_z_mask = 0x400
-	br_p_mask = 0x200
+	br_n_mask = 0x800 # >> 7
+	br_z_mask = 0x400 # >> 6
+	br_p_mask = 0x200 # >> 5
 
 	#imm5 vs source register flag mask
 	#if 0, using 2 registers. if 1, using a register and a imm5
-	operand2_flag_mask = 0x20
+	operand2_flag_mask = 0x20 # >> 5
 
 	#offset masks
 	#offset masks are always the least significant x bits
@@ -36,11 +36,14 @@ def disassemble memory
 	#trap vector mask
 	trap_vector_mask = 0xFF
 
+	
+	#a more asm way of saying index counter
 	instruction_ptr = 0x0
 
+	#give us some table headers
 	puts "addr\tinstruction"
 
-	while instruction_ptr < memory.length #or 0xFFFF
+	while memory[instruction_ptr] - 0xFFFF != 0 #or 0xFFFF
 		this_instruction = memory[instruction_ptr]
 		
 		opcode = (this_instruction & opcode_mask) >> 12
@@ -53,4 +56,4 @@ end
 
 test_memory = (0x0..0xF).collect { |i| i << 12 }
 
-disassemble test_memory
+disassemble test_memory + [0xFFFF]
