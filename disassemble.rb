@@ -156,8 +156,8 @@ def disassemble memory
     valid_instruction = 0
     
     #ADD
-    #example: R0 <- R0 + R5
-    #example: R0 <- R3 + 17
+    #example: ADD R0, R0, R5
+    #example: ADD R0, R3, #17
     if this_opcode - add_code == 0
       print add_string
       print colon_string
@@ -192,8 +192,8 @@ def disassemble memory
     end
     
     #AND
-    #example: R0 <- R0 & R5
-    #example: R0 <- R3 & 17
+    #example: AND R0, R0, R5
+    #example: AND R0, R3, #17
     if this_opcode - and_code == 0
       print and_string
       print colon_string
@@ -227,8 +227,8 @@ def disassemble memory
     end
   
     #BR and NOP
-    #example BR: if CC <= 0, PC <- PC + 5
-    #example NOP
+    #example: BR NZP #4
+    #example: NOP
     if this_opcode - br_code == 0
       cc = (this_instruction & br_cc_mask) >> 9
       if cc == 0
@@ -276,8 +276,8 @@ def disassemble memory
     end
 
     #JMP and RET
-    #example JMP: PC <- R6
-    #example RET: PC <- R7
+    #example: JMP R5
+    #example: RET
     if this_opcode - jmp_code == 0
       #ret and jmp share the same opcode
       reg = (this_instruction & reg2_mask) >> 6
@@ -300,8 +300,8 @@ def disassemble memory
     end
 
     #JSR and JSRR
-    #example JSR: PC <- PC + 123
-    #example JRRR: PC <- R7
+    #example: JSR #123
+    #example: JSRR R3
     if this_opcode - jsr_code == 0
       #jsr and jsrr share the same opcode
       jsr_flag = (this_instruction & jsr_flag_mask) >> 11
@@ -338,7 +338,7 @@ def disassemble memory
     end
 
     #LD
-    #example LD: R3 <- mem[PC + 5]
+    #example: LD R3, #5
     if this_opcode - ld_code == 0
       print ld_string
       print colon_string
@@ -364,7 +364,7 @@ def disassemble memory
     end
 
     #LDI
-    #example LDI: R2 <- mem[mem[PC + 22]]
+    #example: LDI R2, #22
     if this_opcode - ldi_code == 0
       print ldi_string
       print colon_string
@@ -392,7 +392,7 @@ def disassemble memory
     end
 
     #LDR
-    #example LDR: R0 <- mem[R4 + 5]
+    #example: LDR R0, R4, #5
     if this_opcode - ldr_code == 0
       print ldr_string
       print colon_string
@@ -419,7 +419,7 @@ def disassemble memory
     end
 
     #LEA
-    #example LEA: R3 <- PC + 2
+    #example: LEA R3, #2
     if this_opcode - lea_code == 0
       print lea_string
       print colon_string
@@ -441,7 +441,7 @@ def disassemble memory
     end
 
     #NOT
-    #example NOT: R0 <- ~R0
+    #example: NOT R0, R0
     if this_opcode - not_code == 0
       print not_string
       print colon_string
@@ -461,7 +461,7 @@ def disassemble memory
     end
 
     #ST
-    #example ST: mem[PC + 46] <- R1
+    #example: ST R1, #46
     if this_opcode - st_code == 0
       print st_string
       print colon_string
@@ -486,7 +486,7 @@ def disassemble memory
     end
 
     #STI
-    #example STI: mem[mem[PC+ 128]] <- R0
+    #example: STI R0, #128
     if this_opcode - sti_code == 0
       print sti_string
       print colon_string
@@ -514,7 +514,7 @@ def disassemble memory
     end
 
     #STR
-    #example STR: mem[R1 + 3] <- R0
+    #example STR R0, R1, #3
     if this_opcode - str_code == 0
       print str_string
       print colon_string
@@ -549,13 +549,11 @@ def disassemble memory
       valid_instruction = 1
     end
 
-    #ERROR (for all not accepted instructions
+    #ERROR (for all not accepted instructions)
     #example ERROR
     if valid_instruction == 0
       print error_string
     end
-
-    #puts "0x#{instruction_ptr.to_s(16).rjust(4,"0")}\t#{opcode}"
 
     print "\n"
 
