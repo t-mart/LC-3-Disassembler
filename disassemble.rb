@@ -16,9 +16,10 @@ def disassemble memory
 	reg3_mask = 0x7 #the register found at bits 2 through 0
 
 	#condition code masks
-	br_n_mask = 0x800 # >> 7
-	br_z_mask = 0x400 # >> 6
-	br_p_mask = 0x200 # >> 5
+	br_cc_mask = 0xE00 #the whole kitten kaboodle, >> 9
+	br_n_mask = 0x800 # >> 11
+	br_z_mask = 0x400 # >> 10
+	br_p_mask = 0x200 # >> 9
 
 	#imm5 vs source register flag mask
 	#if 0, using 2 registers. if 1, using a register and a imm5
@@ -138,16 +139,75 @@ def disassemble memory
 				imm5 = (this_instruction & imm5_mask)
 				print imm5
 			end
-
 		end
 		
 		#AND
+		#example: R0 = R0 & R5
+		#example: R0 = R3 & 17
 		if this_opcode - and_code == 0
-			this_opcode_string = and_code
-		end
+			print and_string
+			print colon_string
+			print space_string
+			print r_string
+			reg = (this_instruction & reg1_mask) >> 9
+			print reg
+			print space_string
+			print equal_sign_string
+			print space_string
+			print r_string
+			reg = (this_instruction & reg2_mask) >> 6
+			print reg
+			print space_string
+			print and_sign_string
+			print space_string
+			flag = (this_instruction & operand2_flag_mask) >> 5
+			if flag == 0
+				print r_string
+				reg = (this_instruction & reg3_mask)
+				print reg
+			end
+			if flag == 1
+				imm5 = (this_instruction & imm5_mask)
+				print imm5
+			end
 
+
+		end
+	
+		#BR and NOP
+		#example BR: if CC <= 0, PC + 5
+		#example NOP
 		if this_opcode - br_code == 0
-			this_opcode_string = br_string
+			cc = (this_instruction & br_cc_mask) >> 9
+			if cc == 0
+				print nop_string
+			else
+				print br_string
+				print colon_string
+				print space_string
+				print cc_string
+				print space_string
+				n = (this_instruction & br_n_mask) >> 11
+				if n > 0
+					print n_string
+				end
+				z = (this_instruction & br_z_mask) >> 10
+				if z > 0
+					print z_string
+				end
+				p = (this_instruction & br_p_mask) >> 9
+				if p > 0
+					print p_string
+				end
+				print comma_string
+				print space_string
+				print pc_string
+				print space_string
+				print addition_sign_string
+				print space_string
+				offset = (this_instruction & offset9_mask)
+				print offset
+			end
 		end
 
 		if this_opcode - br_code == 0
@@ -210,7 +270,7 @@ def disassemble memory
 	end
 end
 
-test_memory = [0x100F, 0x102F]
+test_memory = [0x100F, 0x102F, 0x500F, 0x502F, 0x027C, 0x0463, 0x06E0, 0x090D, 0x0AAC, 0x0CFD, 0x0E64, 0x00B2]
 #test_memory = (0x0..0xF).collect { |i| i << 12 }
 
 disassemble test_memory + [0xFFFF]
