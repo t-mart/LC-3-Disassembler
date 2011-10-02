@@ -1,6 +1,6 @@
 #Ruby LC-3 Disassembler
 #by Tim Martin
-#
+
 #everything is written in this method. because this code is serving simply as
 #psuedo-code for the final version in assembly itself, IM GOING TO SPARE THE
 #RUBYISMS AND CODE MORE LIKE ASM.
@@ -148,20 +148,18 @@ def disassemble memory
     #example: ADD R0, R3, #17
     if this_opcode - add_code == 0
       print add_string
-      print colon_string
       print space_string
 
       print r_string
       reg = (this_instruction & reg1_mask) >> 9
       print reg
+      print comma_string
       print space_string
-      print set_to_string
-      print space_string
+
       print r_string
       reg = (this_instruction & reg2_mask) >> 6
       print reg
-      print space_string
-      print addition_sign_string
+      print comma_string
       print space_string
       
       #immediate more or source register 2 mode?
@@ -173,6 +171,7 @@ def disassemble memory
       end
       if flag == 1
         imm5 = (this_instruction & imm5_mask)
+        print hash_string
         print imm5
       end
 
@@ -184,20 +183,18 @@ def disassemble memory
     #example: AND R0, R3, #17
     if this_opcode - and_code == 0
       print and_string
-      print colon_string
       print space_string
       
       print r_string
       reg = (this_instruction & reg1_mask) >> 9
       print reg
+      print comma_string
       print space_string
-      print set_to_string
-      print space_string
+
       print r_string
       reg = (this_instruction & reg2_mask) >> 6
       print reg
-      print space_string
-      print and_sign_string
+      print comma_string
       print space_string
       
       flag = (this_instruction & operand2_flag_mask) >> 5
@@ -208,6 +205,7 @@ def disassemble memory
       end
       if flag == 1
         imm5 = (this_instruction & imm5_mask)
+        print hash_string
         print imm5
       end
 
@@ -223,10 +221,6 @@ def disassemble memory
         print nop_string
       else
         print br_string
-        print colon_string
-        print space_string
-        print cc_string
-        print space_string
       
         #n set?
         n = (this_instruction & br_n_mask) >> 11
@@ -246,17 +240,9 @@ def disassemble memory
           print p_string
         end
       
-        print comma_string
-        print space_string
-        print pc_string
-        print space_string
-        print set_to_string
-        print space_string
-        print pc_string
-        print space_string
-        print addition_sign_string
         print space_string
         offset = (this_instruction & offset9_mask)
+        print hash_string
         print offset
       end
 
@@ -273,16 +259,11 @@ def disassemble memory
         print ret_string
       else
         print jmp_string
+        print space_string
+
+        print r_string
+        print reg
       end
-      print colon_string
-      
-      print space_string
-      print pc_string
-      print space_string
-      print set_to_string
-      print space_string
-      print r_string
-      print reg
       
       valid_instruction = 1
     end
@@ -296,27 +277,14 @@ def disassemble memory
       if jsr_flag > 0
         offset = (this_instruction & offset11_mask)
         print jsr_string
-        print colon_string
-      
         print space_string
-        print pc_string
-        print space_string
-        print set_to_string
-        print space_string
-        print pc_string
-        print space_string
-        print addition_sign_string
-        print space_string
+
+        print hash_string
         print offset
       else
         print jsrr_string
-        print colon_string
-      
         print space_string
-        print pc_string
-        print space_string
-        print set_to_string
-        print space_string
+
         print r_string
         reg = (this_instruction & reg2_mask) >> 6
         print reg
@@ -329,24 +297,17 @@ def disassemble memory
     #example: LD R3, #5
     if this_opcode - ld_code == 0
       print ld_string
-      print colon_string
-      
       print space_string
+
       print r_string
       reg = (this_instruction & reg1_mask) >> 9
       print reg
+      print comma_string
       print space_string
-      print set_to_string
-      print space_string
-      print mem_string
-      print left_bracket_string
-      print pc_string
-      print space_string
-      print addition_sign_string
-      print space_string
+
       offset = (this_instruction & offset9_mask)
+      print hash_string
       print offset
-      print right_bracket_string
       
       valid_instruction = 1
     end
@@ -355,26 +316,17 @@ def disassemble memory
     #example: LDI R2, #22
     if this_opcode - ldi_code == 0
       print ldi_string
-      print colon_string
       print space_string
+
       print r_string
       reg = (this_instruction & reg1_mask) >> 9
       print reg
+      print comma_string
       print space_string
-      print set_to_string
-      print space_string
-      print mem_string
-      print left_bracket_string
-      print mem_string
-      print left_bracket_string
-      print pc_string
-      print space_string
-      print addition_sign_string
-      print space_string
+
       offset = (this_instruction & offset9_mask)
+      print hash_string
       print offset
-      print right_bracket_string
-      print right_bracket_string
       
       valid_instruction = 1
     end
@@ -383,25 +335,23 @@ def disassemble memory
     #example: LDR R0, R4, #5
     if this_opcode - ldr_code == 0
       print ldr_string
-      print colon_string
       print space_string
+
       print r_string
       reg = (this_instruction & reg1_mask) >> 9
       print reg
+      print comma_string
       print space_string
-      print set_to_string
-      print space_string
-      print mem_string
-      print left_bracket_string
+
       print r_string
       reg = (this_instruction & reg2_mask) >> 6
       print reg
+      print comma_string
       print space_string
-      print addition_sign_string
-      print space_string
+
       offset = (this_instruction & offset6_mask)
+      print hash_string
       print offset
-      print right_bracket_string
       
       valid_instruction = 1
     end
@@ -410,19 +360,16 @@ def disassemble memory
     #example: LEA R3, #2
     if this_opcode - lea_code == 0
       print lea_string
-      print colon_string
       print space_string
+
       print r_string
       reg = (this_instruction & reg1_mask) >> 9
       print reg
+      print comma_string
       print space_string
-      print set_to_string
-      print space_string
-      print pc_string
-      print space_string
-      print addition_sign_string
-      print space_string
+
       offset = (this_instruction & offset9_mask)
+      print hash_string
       print offset
       
       valid_instruction = 1
@@ -432,15 +379,14 @@ def disassemble memory
     #example: NOT R0, R0
     if this_opcode - not_code == 0
       print not_string
-      print colon_string
       print space_string
+
       print r_string
       reg = (this_instruction & reg1_mask) >> 9
       print reg
+      print comma_string
       print space_string
-      print set_to_string
-      print space_string
-      print not_sign_string
+
       print r_string
       reg = (this_instruction & reg2_mask) >> 6
       print reg
@@ -452,23 +398,17 @@ def disassemble memory
     #example: ST R1, #46
     if this_opcode - st_code == 0
       print st_string
-      print colon_string
       print space_string
-      print mem_string
-      print left_bracket_string
-      print pc_string
-      print space_string
-      print addition_sign_string
-      print space_string
-      offset = (this_instruction & offset9_mask)
-      print offset
-      print right_bracket_string
-      print space_string
-      print set_to_string
-      print space_string
+
       print r_string
       reg = (this_instruction & reg1_mask) >> 9
       print reg
+      print comma_string
+      print space_string
+
+      offset = (this_instruction & offset9_mask)
+      print hash_string
+      print offset
 
       valid_instruction = 1
     end
@@ -477,26 +417,17 @@ def disassemble memory
     #example: STI R0, #128
     if this_opcode - sti_code == 0
       print sti_string
-      print colon_string
       print space_string
-      print mem_string
-      print left_bracket_string
-      print mem_string
-      print left_bracket_string
-      print pc_string
-      print space_string
-      print addition_sign_string
-      print space_string
-      offset = (this_instruction & offset9_mask)
-      print offset
-      print right_bracket_string
-      print right_bracket_string
-      print space_string
-      print set_to_string
-      print space_string
+
       print r_string
       reg = (this_instruction & reg1_mask) >> 9
       print reg
+      print comma_string
+      print space_string
+
+      offset = (this_instruction & offset9_mask)
+      print hash_string
+      print offset
 
       valid_instruction = 1
     end
@@ -505,25 +436,23 @@ def disassemble memory
     #example STR R0, R1, #3
     if this_opcode - str_code == 0
       print str_string
-      print colon_string
       print space_string
-      print mem_string
-      print left_bracket_string
-      print r_string
-      reg = (this_instruction & reg2_mask) >> 6
-      print reg
-      print space_string
-      print addition_sign_string
-      print space_string
-      offset = (this_instruction & offset6_mask)
-      print offset
-      print right_bracket_string
-      print space_string
-      print set_to_string
-      print space_string
+
       print r_string
       reg = (this_instruction & reg1_mask) >> 9
       print reg
+      print comma_string
+      print space_string
+
+      print r_string
+      reg = (this_instruction & reg2_mask) >> 6
+      print reg
+      print comma_string
+      print space_string
+
+      offset = (this_instruction & offset6_mask)
+      print hash_string
+      print offset
 
       valid_instruction = 1
 
@@ -554,6 +483,7 @@ test_memory = [
   0x102F,
   0x500F,
   0x502F,
+  0x0E00,
   0x027C,
   0x0463,
   0x06E0,
