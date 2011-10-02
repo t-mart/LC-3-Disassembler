@@ -91,24 +91,12 @@ def disassemble memory
   n_string = "N"
   z_string = "Z"
   p_string = "P"
-  left_bracket_string = "["
-  right_bracket_string = "]"
-  addition_sign_string = "+"
-  not_sign_string = "~"
-  and_sign_string = "&"
-  set_to_string = "<-" #not really equal, but makes it clear that LHS is set by RHS
-  #greater_than_sign_string = ">"
-  #less_than_sign_string = "<"
-  cc_string = "if cc"
   comma_string = ","
   halt_string = "HALT"
   space_string = " "
-  pc_string = "PC"
   r_string = "R" #as in register, R1, R2, ...
-  colon_string = ":"
-  zero_string = "0"
-  mem_string = "mem"
   error_string = "ERROR"
+  hash_string = "#"
   
   #sign extension addends
   #we can encounter 2's complement numbers that are negative in x number of
