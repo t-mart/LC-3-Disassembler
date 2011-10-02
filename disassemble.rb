@@ -1,10 +1,14 @@
 #Ruby LC-3 Disassembler
 #by Tim Martin
 
-#everything is written in this method. because this code is serving simply as psuedo-code for the final version in assembly itself, IM GOING TO SPARE THE RUBYISMS AND CODE MORE LIKE ASM.
+#everything is written in this method. because this code is serving simply as
+#psuedo-code for the final version in assembly itself, IM GOING TO SPARE THE
+#RUBYISMS AND CODE MORE LIKE ASM.
 def disassemble memory	
-	#we're going to be parsing 16-bit instructions. these masks will allow us to get meaningful data out of out of those 16 bits
-	#to use: (instruction & mask) >> x, where x is the index of the least-significant bit of of the mask
+	#we're going to be parsing 16-bit instructions. these masks will allow us to
+	#get meaningful data out of out of those 16 bits
+	#to use: (instruction & mask) >> x, where x is the index of the
+	#least-significant bit of of the mask
 	#e.g (0x00011011000001100 & opcode mask) >> 12 = 0001
 
 	#opcode mask
@@ -59,7 +63,8 @@ def disassemble memory
 	st_code = 0x3
 	sti_code = 0xB
 	str_code = 0x7
-	trap_code = 0xF
+	#trap_code = 0xF
+	halt_code = 0xF025 # we only have 1 trap (0xF---), and thats halt
 
 
 	#opcode strings
@@ -91,9 +96,9 @@ def disassemble memory
 	addition_sign_string = "+"
 	not_sign_string = "~"
 	and_sign_string = "&"
-	equal_sign_string = "="
-	greater_than_sign_string = ">"
-	less_than_sign_string = "<"
+	equal_sign_string = "<=" #not really equal, but makes it clear that LHS is set by RHS
+	#greater_than_sign_string = ">"
+	#less_than_sign_string = "<"
 	cc_string = "if cc"
 	comma_string = ","
 	halt_string = "HALT"
@@ -102,17 +107,19 @@ def disassemble memory
 	r_string = "R" #as in register, R1, R2, ...
 	colon_string = ":"
 	zero_string = "0"
+	mem_string = "mem"
+	error_string = "ERROR"
 	
 	#sign extension addends
-	#we can encounter 2's complement numbers that are negative in x number of bits,
-	#but not y number.
+	#we can encounter 2's complement numbers that are negative in x number of
+	#bits, but not y number.
 	#
 	#for example: (binary) 0000 0101
 	#in 3-bit 2's comp, this number is -3
 	#in 8-bit 2's comp, this number is 5
 	#
 	#since ruby and lc3 have no (primitive) understanding of numbers with smaller 
-	#bit lengths than the system default (32 and 16 respectively), we need to sign 
+	#bit lengths than the system default (32 and 16 respectively), we need to sign
 	#extend these numbers so that the system also conveys bit these lengths.
 	#
 	#for negative 2's complement numbers, if we assume that the msb == the desired
@@ -128,10 +135,10 @@ def disassemble memory
 	#NOTE: this is a system-dependent implementation. on this dev machine, the
 	#integers we get by default are 32 bits. on lc3, its 16, and it could be
 	#anything else for other machines. proceed with caution.
-	5bit_extender = 0xFFFFFFE0
-	6bit_extender = 0xFFFFFFC0
-	9bit_extender = 0xFFFFFE00
-	11bit_extender = 0xFFFFF800
+	bit5_extender = 0xFFFFFFE0
+	bit6_extender = 0xFFFFFFC0
+	bit9_extender = 0xFFFFFE00
+	bit11_extender = 0xFFFFF800
 
 	
 	#a more asm way of saying index counter
@@ -141,6 +148,12 @@ def disassemble memory
 		this_instruction = memory[instruction_ptr]
 		
 		this_opcode = (this_instruction & opcode_mask) >> 12
+
+		#we'll force the opcode code to turn this on
+		#if we get down to the bottom, and this hasn't been set, we've encountered one of the
+		#no-no opcodes for this homework, such as RTI, (reserved opcode), or traps other than
+		#HALT. in that case, write ERROR
+		valid_instruction = 0
 		
 		#ADD
 		#example: R0 = R0 + R5
@@ -171,6 +184,7 @@ def disassemble memory
 				imm5 = (this_instruction & imm5_mask)
 				print imm5
 			end
+			valid_instruction = 1
 		end
 		
 		#AND
@@ -202,8 +216,7 @@ def disassemble memory
 				imm5 = (this_instruction & imm5_mask)
 				print imm5
 			end
-
-
+			valid_instruction = 1
 		end
 	
 		#BR and NOP
@@ -235,63 +248,256 @@ def disassemble memory
 				print space_string
 				print pc_string
 				print space_string
+				print equal_sign_string
+				print space_string
+				print pc_string
+				print space_string
 				print addition_sign_string
 				print space_string
 				offset = (this_instruction & offset9_mask)
 				print offset
 			end
-		end
-
-		if this_opcode - br_code == 0
-			this_opcode_string = br_string
-		end
-
-		if this_opcode - br_code == 0
-			this_opcode_string = br_string
+			valid_instruction = 1
 		end
 
 		if this_opcode - jmp_code == 0
-			this_opcode_string = jmp_string
+			reg = (this_instruction & reg2_mask) >> 6
+			if reg - 7 == 0
+				print ret_string
+			else
+				print jmp_string
+			end
+			print colon_string
+			print space_string
+			print pc_string
+			print space_string
+			print equal_sign_string
+			print space_string
+			print r_string
+			print reg
+			valid_instruction = 1
 		end
 
 		if this_opcode - jsr_code == 0
-			this_opcode_string = jsr_string
+			jsr_flag = (this_instruction & jsr_flag_mask) >> 11
+			if jsr_flag > 0
+				offset = (this_instruction & offset11_mask)
+				print jsr_string
+				print colon_string
+				print space_string
+				print pc_string
+				print space_string
+				print equal_sign_string
+				print space_string
+				print pc_string
+				print space_string
+				print addition_sign_string
+				print space_string
+				print offset
+			else
+				print jsrr_string
+				print colon_string
+				print space_string
+				print pc_string
+				print space_string
+				print equal_sign_string
+				print space_string
+				print r_string
+				reg = (this_instruction & reg2_mask) >> 6
+				print reg
+			end
+			valid_instruction = 1
 		end
 
 		if this_opcode - ld_code == 0
-			this_opcode_string = ld_string
+			print ld_string
+			print colon_string
+			print space_string
+			print r_string
+			reg = (this_instruction & reg1_mask) >> 9
+			print reg
+			print space_string
+			print equal_sign_string
+			print space_string
+			print mem_string
+			print left_bracket_string
+			print pc_string
+			print space_string
+			print addition_sign_string
+			print space_string
+			offset = (this_instruction & offset9_mask)
+			print offset
+			print right_bracket_string
+			valid_instruction = 1
 		end
 
 		if this_opcode - ldi_code == 0
-			this_opcode_string = ldi_string
+			print ldi_string
+			print colon_string
+			print space_string
+			print r_string
+			reg = (this_instruction & reg1_mask) >> 9
+			print reg
+			print space_string
+			print equal_sign_string
+			print space_string
+			print mem_string
+			print left_bracket_string
+			print mem_string
+			print left_bracket_string
+			print pc_string
+			print space_string
+			print addition_sign_string
+			print space_string
+			offset = (this_instruction & offset9_mask)
+			print offset
+			print right_bracket_string
+			print right_bracket_string
+			valid_instruction = 1
 		end
 
 		if this_opcode - ldr_code == 0
-			this_opcode_string = ldr_string
+			print ldr_string
+			print colon_string
+			print space_string
+			print r_string
+			reg = (this_instruction & reg1_mask) >> 9
+			print reg
+			print space_string
+			print equal_sign_string
+			print space_string
+			print mem_string
+			print left_bracket_string
+			print r_string
+			reg = (this_instruction & reg2_mask) >> 6
+			print reg
+			print space_string
+			print addition_sign_string
+			print space_string
+			offset = (this_instruction & offset6_mask)
+			print offset
+			print right_bracket_string
+			valid_instruction = 1
 		end
 
 		if this_opcode - lea_code == 0
-			this_opcode_string = lea_string
+			print lea_string
+			print colon_string
+			print space_string
+			print r_string
+			reg = (this_instruction & reg1_mask) >> 9
+			print reg
+			print space_string
+			print equal_sign_string
+			print space_string
+			print pc_string
+			print space_string
+			print addition_sign_string
+			print space_string
+			offset = (this_instruction & offset9_mask)
+			print offset
+			valid_instruction = 1
 		end
 
 		if this_opcode - not_code == 0
-			this_opcode_string = not_string
+			print not_string
+			print colon_string
+			print space_string
+			print r_string
+			reg = (this_instruction & reg1_mask) >> 9
+			print reg
+			print space_string
+			print equal_sign_string
+			print space_string
+			print not_sign_string
+			print r_string
+			reg = (this_instruction & reg2_mask) >> 6
+			print reg
+			valid_instruction = 1
 		end
 
 		if this_opcode - st_code == 0
-			this_opcode_string = st_string
+			print st_string
+			print colon_string
+			print space_string
+			print mem_string
+			print left_bracket_string
+			print pc_string
+			print space_string
+			print addition_sign_string
+			print space_string
+			offset = (this_instruction & offset9_mask)
+			print offset
+			print right_bracket_string
+			print space_string
+			print equal_sign_string
+			print space_string
+			print r_string
+			reg = (this_instruction & reg1_mask) >> 9
+			print reg
+
+			valid_instruction = 1
 		end
 
 		if this_opcode - sti_code == 0
-			this_opcode_string = sti_string
+			print sti_string
+			print colon_string
+			print space_string
+			print mem_string
+			print left_bracket_string
+			print mem_string
+			print left_bracket_string
+			print pc_string
+			print space_string
+			print addition_sign_string
+			print space_string
+			offset = (this_instruction & offset9_mask)
+			print offset
+			print right_bracket_string
+			print right_bracket_string
+			print space_string
+			print equal_sign_string
+			print space_string
+			print r_string
+			reg = (this_instruction & reg1_mask) >> 9
+			print reg
+
+			valid_instruction = 1
 		end
 
 		if this_opcode - str_code == 0
-			this_opcode_string = str_string
+			print str_string
+			print colon_string
+			print space_string
+			print mem_string
+			print left_bracket_string
+			print r_string
+			reg = (this_instruction & reg2_mask) >> 6
+			print reg
+			print space_string
+			print addition_sign_string
+			print space_string
+			offset = (this_instruction & offset6_mask)
+			print offset
+			print right_bracket_string
+			print space_string
+			print equal_sign_string
+			print space_string
+			print r_string
+			reg = (this_instruction & reg1_mask) >> 9
+			print reg
+
+			valid_instruction = 1
+
 		end
 
-		if this_opcode - trap_code == 0
-			this_opcode_string = trap_string
+		if this_instruction - halt_code == 0
+			print halt_string
+			valid_instruction = 1
+		end
+
+		if valid_instruction == 0
+			print error_string
 		end
 
 		#puts "0x#{instruction_ptr.to_s(16).rjust(4,"0")}\t#{opcode}"
@@ -302,7 +508,36 @@ def disassemble memory
 	end
 end
 
-test_memory = [0x100F, 0x102F, 0x500F, 0x502F, 0x027C, 0x0463, 0x06E0, 0x090D, 0x0AAC, 0x0CFD, 0x0E64, 0x00B2]
+test_memory = [
+	0x100F,
+	0x102F,
+	0x500F,
+	0x502F,
+	0x027C,
+	0x0463,
+	0x06E0,
+	0x090D,
+	0x0AAC,
+	0x0CFD,
+	0x0E64,
+	0x00B2,
+	0xC180,
+	0xC1C0,
+	0x49C0,
+	0x41C0,
+	0x284F,
+	0xA84D,
+	0x684D,
+	0xEA0D,
+	0x9A3F,
+	0x8000,
+	0x86AF,
+	0x3A34,
+	0xBA34,
+	0x7A34,
+	0xF025,
+	0xF024
+]
 #test_memory = (0x0..0xF).collect { |i| i << 12 }
 
 disassemble test_memory + [0xFFFF]
