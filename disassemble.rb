@@ -96,7 +96,7 @@ def disassemble memory
   addition_sign_string = "+"
   not_sign_string = "~"
   and_sign_string = "&"
-  equal_sign_string = "<=" #not really equal, but makes it clear that LHS is set by RHS
+  set_to_string = "<-" #not really equal, but makes it clear that LHS is set by RHS
   #greater_than_sign_string = ">"
   #less_than_sign_string = "<"
   cc_string = "if cc"
@@ -135,10 +135,10 @@ def disassemble memory
   #NOTE: this is a system-dependent implementation. on this dev machine, the
   #integers we get by default are 32 bits. on lc3, its 16, and it could be
   #anything else for other machines. proceed with caution.
-  bit5_extender = 0xFFFFFFE0
-  bit6_extender = 0xFFFFFFC0
-  bit9_extender = 0xFFFFFE00
-  bit11_extender = 0xFFFFF800
+#  bit5_extender = 0xFFFFFFE0
+#  bit6_extender = 0xFFFFFFC0
+#  bit9_extender = 0xFFFFFE00
+#  bit11_extender = 0xFFFFF800
 
   
   #a more asm way of saying index counter
@@ -156,8 +156,8 @@ def disassemble memory
     valid_instruction = 0
     
     #ADD
-    #example: R0 = R0 + R5
-    #example: R0 = R3 + 17
+    #example: R0 <- R0 + R5
+    #example: R0 <- R3 + 17
     if this_opcode - add_code == 0
       print add_string
       print colon_string
@@ -167,7 +167,7 @@ def disassemble memory
       reg = (this_instruction & reg1_mask) >> 9
       print reg
       print space_string
-      print equal_sign_string
+      print set_to_string
       print space_string
       print r_string
       reg = (this_instruction & reg2_mask) >> 6
@@ -175,6 +175,8 @@ def disassemble memory
       print space_string
       print addition_sign_string
       print space_string
+      
+      #immediate more or source register 2 mode?
       flag = (this_instruction & operand2_flag_mask) >> 5
       if flag == 0
         print r_string
@@ -185,21 +187,23 @@ def disassemble memory
         imm5 = (this_instruction & imm5_mask)
         print imm5
       end
+
       valid_instruction = 1
     end
     
     #AND
-    #example: R0 = R0 & R5
-    #example: R0 = R3 & 17
+    #example: R0 <- R0 & R5
+    #example: R0 <- R3 & 17
     if this_opcode - and_code == 0
       print and_string
       print colon_string
       print space_string
+      
       print r_string
       reg = (this_instruction & reg1_mask) >> 9
       print reg
       print space_string
-      print equal_sign_string
+      print set_to_string
       print space_string
       print r_string
       reg = (this_instruction & reg2_mask) >> 6
@@ -207,6 +211,7 @@ def disassemble memory
       print space_string
       print and_sign_string
       print space_string
+      
       flag = (this_instruction & operand2_flag_mask) >> 5
       if flag == 0
         print r_string
@@ -217,11 +222,12 @@ def disassemble memory
         imm5 = (this_instruction & imm5_mask)
         print imm5
       end
+
       valid_instruction = 1
     end
   
     #BR and NOP
-    #example BR: if CC <= 0, PC + 5
+    #example BR: if CC <= 0, PC <- PC + 5
     #example NOP
     if this_opcode - br_code == 0
       cc = (this_instruction & br_cc_mask) >> 9
@@ -233,23 +239,30 @@ def disassemble memory
         print space_string
         print cc_string
         print space_string
+      
+        #n set?
         n = (this_instruction & br_n_mask) >> 11
         if n > 0
           print n_string
         end
+      
+        #z set?
         z = (this_instruction & br_z_mask) >> 10
         if z > 0
           print z_string
         end
+      
+        #p set?
         p = (this_instruction & br_p_mask) >> 9
         if p > 0
           print p_string
         end
+      
         print comma_string
         print space_string
         print pc_string
         print space_string
-        print equal_sign_string
+        print set_to_string
         print space_string
         print pc_string
         print space_string
@@ -258,10 +271,15 @@ def disassemble memory
         offset = (this_instruction & offset9_mask)
         print offset
       end
+
       valid_instruction = 1
     end
 
+    #JMP and RET
+    #example JMP: PC <- R6
+    #example RET: PC <- R7
     if this_opcode - jmp_code == 0
+      #ret and jmp share the same opcode
       reg = (this_instruction & reg2_mask) >> 6
       if reg - 7 == 0
         print ret_string
@@ -269,26 +287,33 @@ def disassemble memory
         print jmp_string
       end
       print colon_string
+      
       print space_string
       print pc_string
       print space_string
-      print equal_sign_string
+      print set_to_string
       print space_string
       print r_string
       print reg
+      
       valid_instruction = 1
     end
 
+    #JSR and JSRR
+    #example JSR: PC <- PC + 123
+    #example JRRR: PC <- R7
     if this_opcode - jsr_code == 0
+      #jsr and jsrr share the same opcode
       jsr_flag = (this_instruction & jsr_flag_mask) >> 11
       if jsr_flag > 0
         offset = (this_instruction & offset11_mask)
         print jsr_string
         print colon_string
+      
         print space_string
         print pc_string
         print space_string
-        print equal_sign_string
+        print set_to_string
         print space_string
         print pc_string
         print space_string
@@ -298,27 +323,32 @@ def disassemble memory
       else
         print jsrr_string
         print colon_string
+      
         print space_string
         print pc_string
         print space_string
-        print equal_sign_string
+        print set_to_string
         print space_string
         print r_string
         reg = (this_instruction & reg2_mask) >> 6
         print reg
       end
+
       valid_instruction = 1
     end
 
+    #LD
+    #example LD: R3 <- mem[PC + 5]
     if this_opcode - ld_code == 0
       print ld_string
       print colon_string
+      
       print space_string
       print r_string
       reg = (this_instruction & reg1_mask) >> 9
       print reg
       print space_string
-      print equal_sign_string
+      print set_to_string
       print space_string
       print mem_string
       print left_bracket_string
@@ -329,9 +359,12 @@ def disassemble memory
       offset = (this_instruction & offset9_mask)
       print offset
       print right_bracket_string
+      
       valid_instruction = 1
     end
 
+    #LDI
+    #example LDI: R2 <- mem[mem[PC + 22]]
     if this_opcode - ldi_code == 0
       print ldi_string
       print colon_string
@@ -340,7 +373,7 @@ def disassemble memory
       reg = (this_instruction & reg1_mask) >> 9
       print reg
       print space_string
-      print equal_sign_string
+      print set_to_string
       print space_string
       print mem_string
       print left_bracket_string
@@ -354,9 +387,12 @@ def disassemble memory
       print offset
       print right_bracket_string
       print right_bracket_string
+      
       valid_instruction = 1
     end
 
+    #LDR
+    #example LDR: R0 <- mem[R4 + 5]
     if this_opcode - ldr_code == 0
       print ldr_string
       print colon_string
@@ -365,7 +401,7 @@ def disassemble memory
       reg = (this_instruction & reg1_mask) >> 9
       print reg
       print space_string
-      print equal_sign_string
+      print set_to_string
       print space_string
       print mem_string
       print left_bracket_string
@@ -378,9 +414,12 @@ def disassemble memory
       offset = (this_instruction & offset6_mask)
       print offset
       print right_bracket_string
+      
       valid_instruction = 1
     end
 
+    #LEA
+    #example LEA: R3 <- PC + 2
     if this_opcode - lea_code == 0
       print lea_string
       print colon_string
@@ -389,7 +428,7 @@ def disassemble memory
       reg = (this_instruction & reg1_mask) >> 9
       print reg
       print space_string
-      print equal_sign_string
+      print set_to_string
       print space_string
       print pc_string
       print space_string
@@ -397,9 +436,12 @@ def disassemble memory
       print space_string
       offset = (this_instruction & offset9_mask)
       print offset
+      
       valid_instruction = 1
     end
 
+    #NOT
+    #example NOT: R0 <- ~R0
     if this_opcode - not_code == 0
       print not_string
       print colon_string
@@ -408,15 +450,18 @@ def disassemble memory
       reg = (this_instruction & reg1_mask) >> 9
       print reg
       print space_string
-      print equal_sign_string
+      print set_to_string
       print space_string
       print not_sign_string
       print r_string
       reg = (this_instruction & reg2_mask) >> 6
       print reg
+      
       valid_instruction = 1
     end
 
+    #ST
+    #example ST: mem[PC + 46] <- R1
     if this_opcode - st_code == 0
       print st_string
       print colon_string
@@ -431,7 +476,7 @@ def disassemble memory
       print offset
       print right_bracket_string
       print space_string
-      print equal_sign_string
+      print set_to_string
       print space_string
       print r_string
       reg = (this_instruction & reg1_mask) >> 9
@@ -440,6 +485,8 @@ def disassemble memory
       valid_instruction = 1
     end
 
+    #STI
+    #example STI: mem[mem[PC+ 128]] <- R0
     if this_opcode - sti_code == 0
       print sti_string
       print colon_string
@@ -457,7 +504,7 @@ def disassemble memory
       print right_bracket_string
       print right_bracket_string
       print space_string
-      print equal_sign_string
+      print set_to_string
       print space_string
       print r_string
       reg = (this_instruction & reg1_mask) >> 9
@@ -466,6 +513,8 @@ def disassemble memory
       valid_instruction = 1
     end
 
+    #STR
+    #example STR: mem[R1 + 3] <- R0
     if this_opcode - str_code == 0
       print str_string
       print colon_string
@@ -482,7 +531,7 @@ def disassemble memory
       print offset
       print right_bracket_string
       print space_string
-      print equal_sign_string
+      print set_to_string
       print space_string
       print r_string
       reg = (this_instruction & reg1_mask) >> 9
@@ -492,11 +541,16 @@ def disassemble memory
 
     end
 
+    #HALT
+    #example HALT
     if this_instruction - halt_code == 0
       print halt_string
+
       valid_instruction = 1
     end
 
+    #ERROR (for all not accepted instructions
+    #example ERROR
     if valid_instruction == 0
       print error_string
     end
