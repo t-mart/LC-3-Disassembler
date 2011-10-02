@@ -459,7 +459,7 @@ def disassemble memory
     end
 
     #HALT
-    #example HALT
+    #example: HALT
     if this_instruction - halt_code == 0
       print halt_string
 
@@ -467,7 +467,7 @@ def disassemble memory
     end
 
     #ERROR (for all not accepted instructions)
-    #example ERROR
+    #example: ERROR
     if valid_instruction == 0
       print error_string
     end
