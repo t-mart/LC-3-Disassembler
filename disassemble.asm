@@ -1,9 +1,10 @@
 ;LC-3 LC-3 Disassembler
 ;by Tim Martin
+
 ;======DO NOT EDIT THIS SECTION=================================================
 .orig x3000
-	LD R6, POINTER
-	BR DISASSEMBLE
+  LD R6, POINTER
+  BR DISASSEMBLE
 
 POINTER .fill xFE00
 ;===============================================================================
@@ -521,7 +522,7 @@ test_memory = [
 ;test_memory = (0x0..0xF).collect { |i| i << 12 }
 
 disassemble test_memory + [0xFFFF]
-	
+  
 ;======DO NOT EDIT THIS SECTION=================================================
 
 ;; Preconditions:
@@ -614,10 +615,10 @@ PRINT_NUM:
 
 ;Instructions to disassemble.  Put things here to test them.
 .orig x5000
-	ADD R0, R0, R0
-	BRNZP 0
-	HALT
-	.fill xD000
-	.fill xFFFF
+  ADD R0, R0, R0
+  BRNZP 0
+  HALT
+  .fill xD000
+  .fill xFFFF
 .end
 
