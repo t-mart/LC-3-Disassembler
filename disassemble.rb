@@ -90,16 +90,48 @@ def disassemble memory
 	right_bracket_string = "]"
 	addition_sign_string = "+"
 	not_sign_string = "~"
+	and_sign_string = "&"
 	equal_sign_string = "="
 	greater_than_sign_string = ">"
 	less_than_sign_string = "<"
-	cc_string = "cc"
+	cc_string = "if cc"
 	comma_string = ","
 	halt_string = "HALT"
 	space_string = " "
 	pc_string = "PC"
 	r_string = "R" #as in register, R1, R2, ...
 	colon_string = ":"
+	zero_string = "0"
+	
+	#sign extension addends
+	#we can encounter 2's complement numbers that are negative in x number of bits,
+	#but not y number.
+	#
+	#for example: (binary) 0000 0101
+	#in 3-bit 2's comp, this number is -3
+	#in 8-bit 2's comp, this number is 5
+	#
+	#since ruby and lc3 have no (primitive) understanding of numbers with smaller 
+	#bit lengths than the system default (32 and 16 respectively), we need to sign 
+	#extend these numbers so that the system also conveys bit these lengths.
+	#
+	#for negative 2's complement numbers, if we assume that the msb == the desired
+	#bit length (ie, the number has been masked so that it contains no other data
+	#beyond the desired bit length) then we can simply add an appropriate addend
+	#constructed of all 1's in all places beyond the msb.
+	#
+	#extending our previous example: 
+	#-3 = 1111 1101 = 1111 1000 + 0000 0101
+	#
+	#the following are these addends for various desired bit lengths
+	#
+	#NOTE: this is a system-dependent implementation. on this dev machine, the
+	#integers we get by default are 32 bits. on lc3, its 16, and it could be
+	#anything else for other machines. proceed with caution.
+	5bit_extender = 0xFFFFFFE0
+	6bit_extender = 0xFFFFFFC0
+	9bit_extender = 0xFFFFFE00
+	11bit_extender = 0xFFFFF800
 
 	
 	#a more asm way of saying index counter
