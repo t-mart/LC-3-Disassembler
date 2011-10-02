@@ -138,9 +138,9 @@ def disassemble memory
     this_opcode = (this_instruction & opcode_mask) >> 12
 
     #we'll force the opcode code to turn this on
-    #if we get down to the bottom, and this hasn't been set, we've encountered one of the
-    #no-no opcodes for this homework, such as RTI, (reserved opcode), or traps other than
-    #HALT. in that case, write ERROR
+    #if we get down to the bottom, and this hasn't been set, we've encountered
+    #one of the no-no opcodes for this homework, such as RTI, (reserved 
+    #opcode),or traps other thanHALT. in that case, write ERROR
     valid_instruction = 0
     
     #ADD
