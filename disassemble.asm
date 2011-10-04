@@ -89,7 +89,7 @@ DISASSEMBLE:
         JSR PRINT_NUM
 
       FINISH_ADD
-      LD R0, ONE
+      LD R0, one
       ST R0, valid_instruction
     
     ;AND
@@ -390,6 +390,10 @@ DISASSEMBLE:
     ;print "\n"
 
     ;instruction_ptr += 1
+
+  STOP_DISASSEMBLY
+
+  HALT
 
   instruction_ptr .fill x5000
 
