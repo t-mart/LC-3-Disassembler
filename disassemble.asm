@@ -274,6 +274,7 @@ RSHIFT:
 .FILL x6381
 .FILL x6580
 .FILL x1DA2
+.FILL x1020
 .FILL xC1C0
 
 ;; preconditions:
