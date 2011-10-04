@@ -10,140 +10,7 @@ POINTER .fill xFE00
 ;===============================================================================
 
 DISASSEMBLE:
-
-  ;we're going to be parsing 16-bit instructions. these masks will allow us to
-  ;get meaningful data out of out of those 16 bits
-  ;to use: (instruction & mask) >> x, where x is the index of the
-  ;least-significant bit of of the mask
-  ;e.g (0x00011011000001100 & opcode mask) >> 12 = 0001
-
-  ;opcode mask
-  opcode_mask .fill xF000
-
-  ;destination/base and source register masks
-  reg1_mask .fill xE00 ;the register found at bits 11 through 9
-  reg2_mask .fill x1C0 ;the register found at bit 8 through 6
-  reg3_mask .fill x7 ;the register found at bits 2 through 0
-
-  ;condition code masks
-  br_cc_mask .fill xE00 ;the whole kitten kaboodle, >> 9
-  br_n_mask .fill x800 ; >> 11
-  br_z_mask .fill x400 ; >> 10
-  br_p_mask .fill x200 ; >> 9
-
-  ;imm5 vs source register flag mask
-  ;if 0, using 2 registers. if 1, using a register and a imm5
-  operand2_flag_mask .fill x20 ; >> 5
-
-  ;jsr vs jsrr flag mask
-  ;if 0, jsrr. if 1, jsr
-  jsr_flag_mask .fill x800 ; >> 7
-
-  ;offset masks
-  ;offset masks are always the least significant x bits
-  offset9_mask .fill x1FF
-  offset11_mask .fill x7FF
-  offset6_mask .fill x3f
-
-  ;imm5 mask
-  ;always lsb
-  imm5_mask .fill x1F
-
-  ;trap vector mask
-  ;always lsb
-  trap_vector_mask .fill xFF
-
   
-  ;opcodes
-  add_code .fill x1
-  and_code .fill x5
-  br_code .fill x0
-  jmp_code .fill xC
-  jsr_code .fill x4
-  ld_code .fill x2
-  ldi_code .fill xA
-  ldr_code .fill x6
-  lea_code .fill xE
-  not_code .fill x9
-  rti_code .fill x8
-  st_code .fill x3
-  sti_code .fill xB
-  str_code .fill x7
-  ;trap_code .fill xF
-  halt_code .fill xF025 ; we only have 1 trap (xF---), and thats halt
-
-  ;sentinel value
-  sentinel .fill xFFFF
-
-  ;constants
-  zero .fill x0
-  one .fill x1
-  five .fill x5
-  six .fill x6
-  nine .fill x9
-  ten .fill xA
-  eleven .fill xB
-  twelve .fill xC
-
-  ;opcode strings
-  add_string .stringz "ADD "
-  and_string .stringz "AND "
-  br_string .stringz "BR "
-  jmp_string .stringz "JMP "
-  jsr_string .stringz "JSR "
-  jsrr_string .stringz "JSRR "
-  ld_string .stringz "LD "
-  ldi_string .stringz "LDI "
-  ldr_string .stringz "LDR "
-  lea_string .stringz "LEA "
-  not_string .stringz "NOT "
-  nop_string .stringz "NOP "
-  ret_string .stringz "RET "
-  rti_string .stringz "RTI "
-  st_string .stringz "ST "
-  sti_string .stringz "STI "
-  str_string .stringz "STR "
-  trap_string .stringz "TRAP "
-
-  ;other strings
-  n_string .stringz "N"
-  z_string .stringz "Z"
-  p_string .stringz "P"
-  comma_string .stringz ", "
-  halt_string .stringz "HALT"
-  r_string .stringz "R" ;as in register, R1, R2, ...
-  error_string .stringz "ERROR"
-  
-  ;sign extension addends
-  ;we can encounter 2's complement numbers that are negative in x number of
-  ;bits, but not y number.
-  ;
-  ;for example: (binary) 0000 0101
-  ;in 3-bit 2's comp, this number is -3
-  ;in 8-bit 2's comp, this number is 5
-  ;
-  ;since ruby and lc3 have no (primitive) understanding of numbers with smaller 
-  ;bit lengths than the system default (32 and 16 respectively), we need to sign
-  ;extend these numbers so that the system also conveys bit these lengths.
-  ;
-  ;for negative 2's complement numbers, if we assume that the msb == the desired
-  ;bit length (ie, the number has been masked so that it contains no other data
-  ;beyond the desired bit length) then we can simply add an appropriate addend
-  ;constructed of all 1's in all places beyond the msb.
-  ;
-  ;extending our previous example: 
-  ;-3 = 1111 1101 = 1111 1000 + 0000 0101
-  ;
-  ;the following are these addends for various desired bit lengths
-  ;
-  ;NOTE: this is a system-dependent implementation. on this dev machine, the
-  ;integers we get by default are 32 bits. on lc3, its 16, and it could be
-  ;anything else for other machines. proceed with caution.
-;  bit5_extender = xFFFFFFE0
-;  bit6_extender = xFFFFFFC0
-;  bit9_extender = xFFFFFE00
-;  bit11_extender = xFFFFF800
-
   ;Register conventions
   ;R0
   ;R1
@@ -533,6 +400,109 @@ DISASSEMBLE:
   end
 end
 
+
+  ;we're going to be parsing 16-bit instructions. these masks will allow us to
+  ;get meaningful data out of out of those 16 bits
+  ;to use: (instruction & mask) >> x, where x is the index of the
+  ;least-significant bit of of the mask
+  ;e.g (0x00011011000001100 & opcode mask) >> 12 = 0001
+
+  ;opcode mask
+  opcode_mask .fill xF000
+
+  ;destination/base and source register masks
+  reg1_mask .fill xE00 ;the register found at bits 11 through 9
+  reg2_mask .fill x1C0 ;the register found at bit 8 through 6
+  reg3_mask .fill x7 ;the register found at bits 2 through 0
+
+  ;condition code masks
+  br_cc_mask .fill xE00 ;the whole kitten kaboodle, >> 9
+  br_n_mask .fill x800 ; >> 11
+  br_z_mask .fill x400 ; >> 10
+  br_p_mask .fill x200 ; >> 9
+
+  ;imm5 vs source register flag mask
+  ;if 0, using 2 registers. if 1, using a register and a imm5
+  operand2_flag_mask .fill x20 ; >> 5
+
+  ;jsr vs jsrr flag mask
+  ;if 0, jsrr. if 1, jsr
+  jsr_flag_mask .fill x800 ; >> 7
+
+  ;offset masks
+  ;offset masks are always the least significant x bits
+  offset9_mask .fill x1FF
+  offset11_mask .fill x7FF
+  offset6_mask .fill x3f
+
+  ;imm5 mask
+  ;always lsb
+  imm5_mask .fill x1F
+
+  ;trap vector mask
+  ;always lsb
+  trap_vector_mask .fill xFF
+
+  
+  ;opcodes
+  add_code .fill x1
+  and_code .fill x5
+  br_code .fill x0
+  jmp_code .fill xC
+  jsr_code .fill x4
+  ld_code .fill x2
+  ldi_code .fill xA
+  ldr_code .fill x6
+  lea_code .fill xE
+  not_code .fill x9
+  rti_code .fill x8
+  st_code .fill x3
+  sti_code .fill xB
+  str_code .fill x7
+  ;trap_code .fill xF
+  halt_code .fill xF025 ; we only have 1 trap (xF---), and thats halt
+
+  ;sentinel value
+  sentinel .fill xFFFF
+
+  ;constants
+  zero .fill x0
+  one .fill x1
+  five .fill x5
+  six .fill x6
+  nine .fill x9
+  ten .fill xA
+  eleven .fill xB
+  twelve .fill xC
+
+  ;opcode strings
+  add_string .stringz "ADD "
+  and_string .stringz "AND "
+  br_string .stringz "BR "
+  jmp_string .stringz "JMP "
+  jsr_string .stringz "JSR "
+  jsrr_string .stringz "JSRR "
+  ld_string .stringz "LD "
+  ldi_string .stringz "LDI "
+  ldr_string .stringz "LDR "
+  lea_string .stringz "LEA "
+  not_string .stringz "NOT "
+  nop_string .stringz "NOP "
+  ret_string .stringz "RET "
+  rti_string .stringz "RTI "
+  st_string .stringz "ST "
+  sti_string .stringz "STI "
+  str_string .stringz "STR "
+  trap_string .stringz "TRAP "
+
+  ;other strings
+  n_string .stringz "N"
+  z_string .stringz "Z"
+  p_string .stringz "P"
+  comma_string .stringz ", "
+  halt_string .stringz "HALT"
+  r_string .stringz "R" ;as in register, R1, R2, ...
+  error_string .stringz "ERROR"
 test_memory = [
 ]
 ;test_memory = (x0..xF).collect { |i| i << 12 }
