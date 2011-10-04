@@ -40,173 +40,6 @@ DISASSEMBLE:
   JSR RSHIFT
   ADD R4, R0, #0
   
-  ;=================ADD and AND LOGIC=================
-  ADD_AND_LOGIC ;cuz they're so alike!
-  ;determine if this is actually an add opcode
-  LD R0, ADD_CODE
-  NOT R0, R0
-  ADD R0, R0, #1
-  ADD R0, R0, R4
-  BRZ P_ADD_STRING
-  ;determine if and opcode
-  LD R0, AND_CODE
-  NOT R0, R0
-  ADD R0, R0, #1
-  ADD R0, R0, R4
-  BRZ P_AND_STRING
-  BRNP BR_LOGIC ;go down to next opcode processing if not
-
-  ;print ADD
-  P_ADD_STRING
-  LEA R0, ADD_STRING
-  PUTS
-  BR START_ADD_AND
-
-  ;print AND
-  P_AND_STRING
-  LEA R0, AND_STRING
-  PUTS
-
-  START_ADD_AND
-  ;print destination register
-  LEA R0, R_STRING
-  PUTS
-  LD R0, NINE
-  LD R1, REG1_MASK
-  AND R1, R5, R1
-  JSR RSHIFT
-  JSR PRINT_NUM
-  LEA R0, COMMA_STRING
-  PUTS
-
-  ;print source register 1
-  LEA R0, R_STRING
-  PUTS
-  LD R0, SIX
-  LD R1, REG2_MASK
-  AND R1, R5, R1
-  JSR RSHIFT
-  JSR PRINT_NUM
-  LEA R0, COMMA_STRING
-  PUTS
-  
-  ;immediate more or source register 2 mode?
-  LD R0, FIVE
-  LD R1, OPERAND2_FLAG_MASK
-  AND R1, R5, R1
-  JSR RSHIFT
-  ADD R0, R0, #0
-  BRP IMM5
-
-  ;if source register, print it
-  LEA R0, R_STRING
-  PUTS
-  LD R0, REG3_MASK
-  AND R0, R0, R5
-  JSR PRINT_NUM
-  BR FINISH_ADD_AND
-
-  ;if imm5, print it
-  IMM5
-  LEA R0, X_STRING
-  PUTS
-  LD R0, IMM5_MASK
-  AND R0, R0, R5
-  JSR PRINT_NUM
-
-  ;set valid instruction
-  FINISH_ADD_AND
-  LD R0, ONE
-  ST R0, VALID_INSTRUCTION
-
-  ;=========================BR LOGIC======================
-  ;and NOP too!
-  BR_LOGIC
-  ;determine if we have a br opcode
-  LD R0, BR_CODE
-  NOT R0, R0
-  ADD R0, R0, #1
-  ADD R0, R0, R4
-  BRNP JMP_JSRR_LOGIC
-
-  ;cc anaylsis first (because it could be NOP)
-  LD R0, NINE
-  LD R1, BR_CC_MASK
-  AND R1, R1, R5
-  JSR RSHIFT
-  ADD R0, R0, #0 ;just to make sure our cc is current
-  BRNP P_CC
-  ;if no CC set, NOP
-  LEA R0, NOP_STRING
-  PUTS
-  BR FINISH_BR
-
-  P_CC
-  ;first put down BR
-  LEA R0, BR_STRING
-  PUTS
-
-  ;now test each CC
-  ;N
-  LD R0, ELEVEN
-  LD R1, BR_N_MASK
-  AND R1, R1, R5
-  JSR RSHIFT
-  ADD R0, R0, #0 ;make it current
-  BRZ Z_TEST
-  LEA R0, N_STRING
-  PUTS
-
-  ;Z
-  Z_TEST
-  LD R0, TEN
-  LD R1, BR_Z_MASK
-  AND R1, R1, R5
-  JSR RSHIFT
-  ADD R0, R0, #0 ;make it current
-  BRZ P_TEST
-  LEA R0, Z_STRING
-  PUTS
-
-  ;P
-  P_TEST
-  LD R0, NINE
-  LD R1, BR_P_MASK
-  AND R1, R1, R5
-  JSR RSHIFT
-  ADD R0, R0, #0 ;make it current
-  BRZ P_OFFSET
-  LEA R0, P_STRING
-  PUTS
-
-  ;and print the offset (with a space before it!)
-  P_OFFSET
-  LEA R0, SPACE_STRING
-  PUTS
-  LEA R0, X_STRING
-  PUTS
-  LD R0, OFFSET9_MASK
-  AND R0, R0, R5
-  JSR PRINT_NUM
-
-  FINISH_BR
-  LD R0, ONE
-  ST R0, VALID_INSTRUCTION
-
-  ;=======================JMP and JSR LOGIC=================
-  JMP_JSRR_LOGIC
-  ;=========================JSR LOGIC=======================
-  JSR_LOGIC
-  ;==============LD, LDI, LEA, ST, and STI LOGIC============
-  LD_LDI_LEA_ST_STI_LOGIC
-  ;=================LDR and STR LOGIC=======================
-  LDR_STR_LOGIC
-  ;=======================NOT LOGIC=========================
-  NOT_LOGIC
-  ;=======================RET LOGIC=========================
-  RET_LOGIC
-  ;======================HALT LOGIC=========================
-  HALT_LOGIC
 
 
   ;valid_instruction resolution
@@ -247,6 +80,17 @@ DISASSEMBLE:
   ;one of the no-no opcodes for this homework, such as rti, (reserved
   ;opcode), or traps other than halt. in that case, write error
   VALID_INSTRUCTION .FILL x0
+
+  ADD_AND_SR2_PARAMS .FILL x221
+  ADD_AND_IMM5_PARAMS .FILL x121
+  BR_PARAMS .FILL x1E
+  JMP_JSRR_PARAMS .FILL x20
+  JSR_PARAMS .FILL x10
+  LD_LDI_LEA_ST_STI_PARAMS .FILL x41
+  LDR_STR_PARAMS .FILL xA1
+  NOT_PARAMS .FILL x21
+  RET_HALT .FILL x0
+
 
   ;opcode mask
   OPCODE_MASK .FILL xF000
