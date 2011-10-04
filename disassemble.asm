@@ -193,8 +193,33 @@ DISASSEMBLE:
   LD R0, ONE
   ST R0, VALID_INSTRUCTION
 
-  ;=======================JMP and JSR LOGIC=================
+  ;=======================JMP and JSRR LOGIC=================
   JMP_JSRR_LOGIC
+  ;determine if this is jmp opcode
+  LD R0, JMP_CODE
+  NOT R0, R0
+  ADD R0, R0, #1
+  ADD R0, R0, R4
+  BRZ P_JMP_STRING
+  ;determine if jsrr opcode
+  LD R0, JSR_CODE
+  NOT R0, R0
+  ADD R0, R0, #1
+  ADD R0, R0, R4
+  BRZ P_JSRR_STRING
+  BRNP JSR_LOGIC ;go down to next opcode processing if not 
+  ;print ADD
+  P_JMP_STRING
+  LEA R0, JMP_STRING
+  PUTS
+  BR START_JMP_JSRR
+
+  ;print AND
+  P_JSRR_STRING
+  LEA R0, JSRR_STRING
+  PUTS
+
+  START_JMP_JSRR
   ;=========================JSR LOGIC=======================
   JSR_LOGIC
   ;==============LD, LDI, LEA, ST, and STI LOGIC============
