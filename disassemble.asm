@@ -108,6 +108,8 @@ DISASSEMBLE:
 
   ;if imm5, print it
   IMM5
+  LEA R0, X_STRING
+  PUTS
   LD R0, IMM5_MASK
   AND R0, R0, R5
   JSR PRINT_NUM
@@ -118,6 +120,7 @@ DISASSEMBLE:
   ST R0, VALID_INSTRUCTION
 
   ;=========================BR LOGIC======================
+  ;and NOP too!
   BR_LOGIC
   ;determine if we have a br opcode
   LD R0, BR_CODE
@@ -127,8 +130,68 @@ DISASSEMBLE:
   BRNP JMP_JSRR_LOGIC
 
   ;cc anaylsis first (because it could be NOP)
-  ;R3 will store the number of CC codes set
-  AND R3, R3, #0 ;clear it out first
+  LD R0, NINE
+  LD R1, BR_CC_MASK
+  AND R1, R1, R5
+  JSR RSHIFT
+  ADD R0, R0, #0 ;just to make sure our cc is current
+  BRNP P_CC
+  ;if no CC set, NOP
+  LEA R0, NOP_STRING
+  PUTS
+  BR FINISH_BR
+
+  P_CC
+  ;first put down BR
+  LEA R0, BR_STRING
+  PUTS
+
+  ;now test each CC
+  ;N
+  LD R0, ELEVEN
+  LD R1, BR_N_MASK
+  AND R1, R1, R5
+  JSR RSHIFT
+  ADD R0, R0, #0 ;make it current
+  BRZ Z_TEST
+  LEA R0, N_STRING
+  PUTS
+
+  ;Z
+  Z_TEST
+  LD R0, TEN
+  LD R1, BR_Z_MASK
+  AND R1, R1, R5
+  JSR RSHIFT
+  ADD R0, R0, #0 ;make it current
+  BRZ P_TEST
+  LEA R0, Z_STRING
+  PUTS
+
+  ;P
+  P_TEST
+  LD R0, NINE
+  LD R1, BR_P_MASK
+  AND R1, R1, R5
+  JSR RSHIFT
+  ADD R0, R0, #0 ;make it current
+  BRZ P_OFFSET
+  LEA R0, P_STRING
+  PUTS
+
+  ;and print the offset (with a space before it!)
+  P_OFFSET
+  LEA R0, SPACE_STRING
+  PUTS
+  LEA R0, X_STRING
+  PUTS
+  LD R0, OFFSET9_MASK
+  AND R0, R0, R5
+  JSR PRINT_NUM
+
+  FINISH_BR
+  LD R0, ONE
+  ST R0, VALID_INSTRUCTION
 
   ;=======================JMP and JSR LOGIC=================
   JMP_JSRR_LOGIC
@@ -282,6 +345,8 @@ DISASSEMBLE:
   R_STRING .STRINGZ "R" ;as in register, r1, r2, ...
   ERROR_STRING .STRINGZ "ERROR"
   NEWLINE_STRING .STRINGZ "\n"
+  SPACE_STRING .STRINGZ " "
+  X_STRING .STRINGZ "x"
   
   .END
 ;======do not edit this section=================================================
