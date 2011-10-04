@@ -47,27 +47,27 @@ DISASSEMBLE:
     add r0, r0, #1
     add r0, r0, r4
     brnp AND_LOGIC
-      ld R0, add_string
+      lea R0, add_string
       puts
 
-      ld r0, r_string
+      lea r0, r_string
       puts
       ld r0, nine
       ld r1, reg1_mask
       and r1, r5, r1
       jsr RSHIFT
-      puts
-      ld r0, comma_string
+      JSR PRINT_NUM
+      lea r0, comma_string
       puts
 
-      ld r0, r_string
+      lea r0, r_string
       puts
       ld r0, six
       ld r1, reg2_mask
       and r1, r5, r1
       jsr RSHIFT
-      puts
-      ld r0, comma_string
+      JSR PRINT_NUM
+      lea r0, comma_string
       puts
       
       ;immediate more or source register 2 mode?
@@ -77,11 +77,11 @@ DISASSEMBLE:
       JSR RSHIFT
       ADD R0, R0, #0
       BRP ADD_IMM5
-        LD r0, r_string
+        LEA r0, r_string
         puts
         ld r0, reg3_mask
         and r0, r0, r5
-        puts
+        JSR PRINT_NUM
         br FINISH_ADD
       ADD_IMM5
         ld r0, imm5_mask
