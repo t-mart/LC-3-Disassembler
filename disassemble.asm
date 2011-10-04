@@ -21,92 +21,162 @@ DISASSEMBLE:
   ;R6 - off limits
   ;R7 - off limits
 
-
-  DISASSEMBLE_NExT
+  ;===============START DISASSEMBLY LOOP===============
+  DISASSEMBLE_NEXT
+  ;put next instruction into R5
   LDI R5, INSTRUCTION_PTR
-  ADD R0, R5, #1
-  ST R0, INSTRUCTION_PTR
 
-  SENTINEL_CHECK
+  ;check for sentinel
   LD R0, SENTINEL
   NOT R0, R0
   ADD R0, R0, #1
   ADD R0, R0, R5
-
   BRZ STOP_DISASSEMBLY
 
-    LD R1, OPCODE_MASK
-    AND R1, R5, R1
-    LD R0, TWELVE
-    JSR RSHIFT
-    ADD R4, R0, #0
-    
-    ;ADD
-    ;example: ADD R0, R0, R5
-    ;example: ADD R0, R3, ;17
-    ADD_LOGIC
-    LD R0, ADD_CODE
-    NOT R0, R0
-    ADD R0, R0, #1
-    ADD R0, R0, R4
-    BRNP AND_LOGIC
-      LEA R0, ADD_STRING
-      PUTS
+  ;put opcode into R4
+  LD R1, OPCODE_MASK
+  AND R1, R5, R1
+  LD R0, TWELVE
+  JSR RSHIFT
+  ADD R4, R0, #0
+  
+  ;=================ADD and AND LOGIC=================
+  ADD_AND_LOGIC ;cuz they're so alike!
+  ;determine if this is actually an add opcode
+  LD R0, ADD_CODE
+  NOT R0, R0
+  ADD R0, R0, #1
+  ADD R0, R0, R4
+  BRZ P_ADD_STRING
+  ;determine if and opcode
+  LD R0, AND_CODE
+  NOT R0, R0
+  ADD R0, R0, #1
+  ADD R0, R0, R4
+  BRZ P_AND_STRING
+  BRNP BR_LOGIC ;go down to next opcode processing if not
 
-      LEA R0, R_STRING
-      PUTS
-      LD R0, NINE
-      LD R1, REG1_MASK
-      AND R1, R5, R1
-      JSR RSHIFT
-      JSR PRINT_NUM
-      LEA R0, COMMA_STRING
-      PUTS
+  ;print ADD
+  P_ADD_STRING
+  LEA R0, ADD_STRING
+  PUTS
+  BR START_ADD_AND
 
-      LEA R0, R_STRING
-      PUTS
-      LD R0, SIx
-      LD R1, REG2_MASK
-      AND R1, R5, R1
-      JSR RSHIFT
-      JSR PRINT_NUM
-      LEA R0, COMMA_STRING
-      PUTS
-      
-      ;immediate more or source register 2 mode?
-      LD R0, FIVE
-      LD R1, OPERAND2_FLAG_MASK
-      AND R1, R5, R1
-      JSR RSHIFT
-      ADD R0, R0, #0
-      BRP ADD_IMM5
-      ADD_SR2
-        LEA R0, R_STRING
-        PUTS
-        LD R0, REG3_MASK
-        AND R0, R0, R5
-        JSR PRINT_NUM
-        BR FINISH_ADD
-      ADD_IMM5
-        LD R0, IMM5_MASK
-        AND R0, R0, R5
-        JSR PRINT_NUM
+  ;print AND
+  P_AND_STRING
+  LEA R0, AND_STRING
+  PUTS
 
-      FINISH_ADD
-      LD R0, ONE
-      ST R0, VALID_INSTRUCTION
-    
-    ;AND
-    ;example: AND R0, R0, R5
-    ;example: AND R0, R3, ;17
-    AND_LOGIC
+  START_ADD_AND
+  ;print destination register
+  LEA R0, R_STRING
+  PUTS
+  LD R0, NINE
+  LD R1, REG1_MASK
+  AND R1, R5, R1
+  JSR RSHIFT
+  JSR PRINT_NUM
+  LEA R0, COMMA_STRING
+  PUTS
 
-  BR DISASSEMBLE_NExT
+  ;print source register 1
+  LEA R0, R_STRING
+  PUTS
+  LD R0, SIX
+  LD R1, REG2_MASK
+  AND R1, R5, R1
+  JSR RSHIFT
+  JSR PRINT_NUM
+  LEA R0, COMMA_STRING
+  PUTS
+  
+  ;immediate more or source register 2 mode?
+  LD R0, FIVE
+  LD R1, OPERAND2_FLAG_MASK
+  AND R1, R5, R1
+  JSR RSHIFT
+  ADD R0, R0, #0
+  BRP IMM5
+
+  ;if source register, print it
+  LEA R0, R_STRING
+  PUTS
+  LD R0, REG3_MASK
+  AND R0, R0, R5
+  JSR PRINT_NUM
+  BR FINISH_ADD_AND
+
+  ;if imm5, print it
+  IMM5
+  LD R0, IMM5_MASK
+  AND R0, R0, R5
+  JSR PRINT_NUM
+
+  ;set valid instruction
+  FINISH_ADD_AND
+  LD R0, ONE
+  ST R0, VALID_INSTRUCTION
+
+  ;=========================BR LOGIC======================
+  BR_LOGIC
+  ;determine if we have a br opcode
+  LD R0, BR_CODE
+  NOT R0, R0
+  ADD R0, R0, #1
+  ADD R0, R0, R4
+  BRNP JMP_JSRR_LOGIC
+
+  ;cc anaylsis first (because it could be NOP)
+  ;R3 will store the number of CC codes set
+  AND R3, R3, #0 ;clear it out first
+
+  ;=======================JMP and JSR LOGIC=================
+  JMP_JSRR_LOGIC
+  ;=========================JSR LOGIC=======================
+  JSR_LOGIC
+  ;==============LD, LDI, LEA, ST, and STI LOGIC============
+  LD_LDI_LEA_ST_STI_LOGIC
+  ;=================LDR and STR LOGIC=======================
+  LDR_STR_LOGIC
+  ;=======================NOT LOGIC=========================
+  NOT_LOGIC
+  ;=======================RET LOGIC=========================
+  RET_LOGIC
+  ;======================HALT LOGIC=========================
+  HALT_LOGIC
+
+
+  ;valid_instruction resolution
+  ;if we're here and valid instruction is still 0, ERROR
+  LD R0, VALID_INSTRUCTION
+  BRP FINISH_DISASSEMBLE
+  LEA R0, ERROR_STRING
+  PUTS
+
+  FINISH_DISASSEMBLE
+  ;throw down a newline
+  LEA R0, NEWLINE_STRING
+  PUTS
+
+  ;increment the instruction pointer
+  LD R0, INSTRUCTION_PTR
+  ADD R0, R0, #1
+  ST R0, INSTRUCTION_PTR
+
+  ;set valid_instruction to 0(used to print ERROR if its an off limits opcode
+  LD R0, ZERO
+  ST R0, VALID_INSTRUCTION
+
+  BR DISASSEMBLE_NEXT
+
+
 
   STOP_DISASSEMBLY
-
   HALT
 
+  ;==================================CONTSTANTS================================
+
+  ;points to the instruction we're disassembling
   INSTRUCTION_PTR .FILL x5000
 
   ;we'll force the opcode code to turn this on
@@ -114,12 +184,6 @@ DISASSEMBLE:
   ;one of the no-no opcodes for this homework, such as rti, (reserved
   ;opcode), or traps other than halt. in that case, write error
   VALID_INSTRUCTION .FILL x0
-
-  ;we're going to be parsing 16-bit instructions. these masks will allow us to
-  ;get meaningful data out of out of those 16 bits
-  ;to use: (instruction & mask) >> x, where x is the index of the
-  ;least-significant bit of of the mask
-  ;e.g (0x00011011000001100 & opcode mask) >> 12 = 0001
 
   ;opcode mask
   OPCODE_MASK .FILL xF000
@@ -183,7 +247,7 @@ DISASSEMBLE:
   ZERO .FILL x0
   ONE .FILL x1
   FIVE .FILL x5
-  SIx .FILL x6
+  SIX .FILL x6
   NINE .FILL x9
   TEN .FILL xA
   ELEVEN .FILL xB
@@ -192,7 +256,7 @@ DISASSEMBLE:
   ;opcode strings
   ADD_STRING .STRINGZ "ADD "
   AND_STRING .STRINGZ "AND "
-  BR_STRING .STRINGZ "BR "
+  BR_STRING .STRINGZ "BR" ;no space after this because the cc come immediately after
   JMP_STRING .STRINGZ "JMP "
   JSR_STRING .STRINGZ "JSR "
   JSRR_STRING .STRINGZ "JSRR "
@@ -217,6 +281,7 @@ DISASSEMBLE:
   HALT_STRING .STRINGZ "HALT"
   R_STRING .STRINGZ "R" ;as in register, r1, r2, ...
   ERROR_STRING .STRINGZ "ERROR"
+  NEWLINE_STRING .STRINGZ "\n"
   
   .END
 ;======do not edit this section=================================================
