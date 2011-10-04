@@ -22,7 +22,7 @@ DISASSEMBLE:
   ;R7 - off limits
 
 
-  DISASSEMBLE_NEXT
+  DISASSEMBLE_NExT
   LDI R5, INSTRUCTION_PTR
   ADD R0, R5, #1
   ST R0, INSTRUCTION_PTR
@@ -65,7 +65,7 @@ DISASSEMBLE:
 
       LEA R0, R_STRING
       PUTS
-      LD R0, SIX
+      LD R0, SIx
       LD R1, REG2_MASK
       AND R1, R5, R1
       JSR RSHIFT
@@ -101,19 +101,19 @@ DISASSEMBLE:
     ;example: AND R0, R3, ;17
     AND_LOGIC
 
-  BR DISASSEMBLE_NEXT
+  BR DISASSEMBLE_NExT
 
   STOP_DISASSEMBLY
 
   HALT
 
-  INSTRUCTION_PTR .FILL X5000
+  INSTRUCTION_PTR .FILL x5000
 
   ;we'll force the opcode code to turn this on
   ;if we get down to the bottom, and this hasn't been set, we've encountered
   ;one of the no-no opcodes for this homework, such as rti, (reserved
   ;opcode), or traps other than halt. in that case, write error
-  VALID_INSTRUCTION .FILL X0
+  VALID_INSTRUCTION .FILL x0
 
   ;we're going to be parsing 16-bit instructions. these masks will allow us to
   ;get meaningful data out of out of those 16 bits
@@ -122,17 +122,17 @@ DISASSEMBLE:
   ;e.g (0x00011011000001100 & opcode mask) >> 12 = 0001
 
   ;opcode mask
-  OPCODE_MASK .FILL XF000
+  OPCODE_MASK .FILL xF000
 
   ;destination/base and source register masks
-  REG1_MASK .FILL XE00 ;the register found at bits 11 through 9
-  REG2_MASK .FILL X1C0 ;the register found at bit 8 through 6
-  REG3_MASK .FILL X7 ;the register found at bits 2 through 0
+  REG1_MASK .FILL xE00 ;the register found at bits 11 through 9
+  REG2_MASK .FILL x1C0 ;the register found at bit 8 through 6
+  REG3_MASK .FILL x7 ;the register found at bits 2 through 0
 
   ;condition code masks
-  BR_CC_MASK .FILL XE00 ;the whole kitten kaboodle, >> 9
+  BR_CC_MASK .FILL xE00 ;the whole kitten kaboodle, >> 9
   BR_N_MASK .FILL x800 ; >> 11
-  BR_Z_MASK .FILL X400 ; >> 10
+  BR_Z_MASK .FILL x400 ; >> 10
   BR_P_MASK .FILL x200 ; >> 9
 
   ;imm5 vs source register flag mask
@@ -145,49 +145,49 @@ DISASSEMBLE:
 
   ;offset masks
   ;offset masks are always the least significant x bits
-  OFFSET9_MASK .FILL X1FF
-  OFFSET11_MASK .FILL X7FF
-  OFFSET6_MASK .FILL X3F
+  OFFSET9_MASK .FILL x1FF
+  OFFSET11_MASK .FILL x7FF
+  OFFSET6_MASK .FILL x3F
 
   ;imm5 mask
   ;always lsb
-  IMM5_MASK .FILL X1F
+  IMM5_MASK .FILL x1F
 
   ;trap vector mask
   ;always lsb
-  TRAP_VECTOR_MASK .FILL XFF
+  TRAP_VECTOR_MASK .FILL xFF
 
   
   ;opcodes
-  ADD_CODE .FILL X1
-  AND_CODE .FILL X5
-  BR_CODE .FILL X0
-  JMP_CODE .FILL XC
-  JSR_CODE .FILL X4
-  LD_CODE .FILL X2
-  LDI_CODE .FILL XA
-  LDR_CODE .FILL X6
-  LEA_CODE .FILL XE
-  NOT_CODE .FILL X9
-  RTI_CODE .FILL X8
-  ST_CODE .FILL X3
-  STI_CODE .FILL XB
-  STR_CODE .FILL X7
-  ;TRAP_CODE .FILL XF
-  HALT_CODE .FILL XF025 ; we only have 1 trap (xf---), and thats halt
+  ADD_CODE .FILL x1
+  AND_CODE .FILL x5
+  BR_CODE .FILL x0
+  JMP_CODE .FILL xC
+  JSR_CODE .FILL x4
+  LD_CODE .FILL x2
+  LDI_CODE .FILL xA
+  LDR_CODE .FILL x6
+  LEA_CODE .FILL xE
+  NOT_CODE .FILL x9
+  RTI_CODE .FILL x8
+  ST_CODE .FILL x3
+  STI_CODE .FILL xB
+  STR_CODE .FILL x7
+  ;TRAP_CODE .FILL xF
+  HALT_CODE .FILL xF025 ; we only have 1 trap (xf---), and thats halt
 
   ;sentinel value
-  SENTINEL .FILL XFFFF
+  SENTINEL .FILL xFFFF
 
   ;constants
-  ZERO .FILL X0
-  ONE .FILL X1
-  FIVE .FILL X5
-  SIX .FILL X6
-  NINE .FILL X9
-  TEN .FILL XA
-  ELEVEN .FILL XB
-  TWELVE .FILL XC
+  ZERO .FILL x0
+  ONE .FILL x1
+  FIVE .FILL x5
+  SIx .FILL x6
+  NINE .FILL x9
+  TEN .FILL xA
+  ELEVEN .FILL xB
+  TWELVE .FILL xC
 
   ;opcode strings
   ADD_STRING .STRINGZ "ADD "
@@ -229,28 +229,28 @@ DISASSEMBLE:
 ;;  r0 <- r1 >> r0 (x >> y)
 ;;
 RSHIFT:
-.FILL X1DBE
-.FILL X7381
-.FILL X7580
-.FILL X54A0
-.FILL X14AF
-.FILL X14A1
-.FILL X903F
-.FILL X1021
-.FILL X1080
-.FILL X54A0
-.FILL X1482
-.FILL X5241
-.FILL X0601
-.FILL X14A1
-.FILL X1241
-.FILL X103F
-.FILL X03F9
-.FILL X10A0
-.FILL X6381
-.FILL X6580
-.FILL X1DA2
-.FILL XC1C0
+.FILL x1DBE
+.FILL x7381
+.FILL x7580
+.FILL x54A0
+.FILL x14AF
+.FILL x14A1
+.FILL x903F
+.FILL x1021
+.FILL x1080
+.FILL x54A0
+.FILL x1482
+.FILL x5241
+.FILL x0601
+.FILL x14A1
+.FILL x1241
+.FILL x103F
+.FILL x03F9
+.FILL x10A0
+.FILL x6381
+.FILL x6580
+.FILL x1DA2
+.FILL xC1C0
 
 ;; preconditions:
 ;;  r0 contains the number you wish to print
@@ -259,94 +259,94 @@ RSHIFT:
 ;;  r0 still contains the number you wish to print
 ;;  number printed to the console in hex.
 PRINT_NUM:
-.FILL X5000
-.FILL X0A09
-.FILL X1DBE
-.FILL X7180
-.FILL X7F81
-.FILL X2019
-.FILL XF021
-.FILL X6180
-.FILL X6F81
-.FILL X1DA2
-.FILL XC1C0
-.FILL X1DBD
-.FILL X7180
-.FILL X7381
-.FILL X7F82
-.FILL X5000
-.FILL X0409
-.FILL X1220
-.FILL X5020
-.FILL X1024
-.FILL X4FD5
-.FILL X4FF5
-.FILL X1060
-.FILL X2208
-.FILL X5040
-.FILL X4807
-.FILL X6180
-.FILL X6381
-.FILL X6F82
-.FILL X1DA3
-.FILL XC1C0
-.FILL X0030
-.FILL X000F
-.FILL X1DBE
-.FILL X7180
-.FILL X7F81
-.FILL X1036
-.FILL X0606
-.FILL X102F
-.FILL X102F
-.FILL X102F
-.FILL X102D
-.FILL XF021
-.FILL X0E06
-.FILL X102F
-.FILL X102F
-.FILL X102F
-.FILL X102F
-.FILL X1025
-.FILL XF021
-.FILL X6180
-.FILL X6F81
-.FILL X1DA2
-.FILL XC1C0
+.FILL x5000
+.FILL x0A09
+.FILL x1DBE
+.FILL x7180
+.FILL x7F81
+.FILL x2019
+.FILL xF021
+.FILL x6180
+.FILL x6F81
+.FILL x1DA2
+.FILL xC1C0
+.FILL x1DBD
+.FILL x7180
+.FILL x7381
+.FILL x7F82
+.FILL x5000
+.FILL x0409
+.FILL x1220
+.FILL x5020
+.FILL x1024
+.FILL x4FD5
+.FILL x4FF5
+.FILL x1060
+.FILL x2208
+.FILL x5040
+.FILL x4807
+.FILL x6180
+.FILL x6381
+.FILL x6F82
+.FILL x1DA3
+.FILL xC1C0
+.FILL x0030
+.FILL x000F
+.FILL x1DBE
+.FILL x7180
+.FILL x7F81
+.FILL x1036
+.FILL x0606
+.FILL x102F
+.FILL x102F
+.FILL x102F
+.FILL x102D
+.FILL xF021
+.FILL x0E06
+.FILL x102F
+.FILL x102F
+.FILL x102F
+.FILL x102F
+.FILL x1025
+.FILL xF021
+.FILL x6180
+.FILL x6F81
+.FILL x1DA2
+.FILL xC1C0
 .END
 ;===============================================================================
 
 ;instructions to disassemble.  put things here to test them.
-.ORIG X5000
-  .FILL X100F
-  .FILL X102F
-  .FILL X500F
-  .FILL X502F
-  .FILL X0E00
-  .FILL X027C
-  .FILL X0463
-  .FILL X06E0
-  .FILL X090D
-  .FILL X0AAC
-  .FILL X0CFD
-  .FILL X0E64
-  .FILL X00B2
-  .FILL XC180
-  .FILL XC1C0
-  .FILL X49C0
-  .FILL X41C0
-  .FILL X284F
-  .FILL XA84D
-  .FILL X684D
-  .FILL XEA0D
-  .FILL X9A3F
-  .FILL X8000
-  .FILL X86AF
-  .FILL X3A34
-  .FILL XBA34
-  .FILL X7A34
-  .FILL XF025
-  .FILL XF024
-  .FILL XFFFF
+.ORIG x5000
+  .FILL x100F
+  .FILL x102F
+  .FILL x500F
+  .FILL x502F
+  .FILL x0E00
+  .FILL x027C
+  .FILL x0463
+  .FILL x06E0
+  .FILL x090D
+  .FILL x0AAC
+  .FILL x0CFD
+  .FILL x0E64
+  .FILL x00B2
+  .FILL xC180
+  .FILL xC1C0
+  .FILL x49C0
+  .FILL x41C0
+  .FILL x284F
+  .FILL xA84D
+  .FILL x684D
+  .FILL xEA0D
+  .FILL x9A3F
+  .FILL x8000
+  .FILL x86AF
+  .FILL x3A34
+  .FILL xBA34
+  .FILL x7A34
+  .FILL xF025
+  .FILL xF024
+  .FILL xFFFF
 .END
 
