@@ -15,7 +15,7 @@ DISASSEMBLE:
   ;R0
   ;R1
   ;R2
-  ;R3
+  ;R3 - param code
   ;R4 - this opcode
   ;R5 - this instruction
   ;R6 - off limits
@@ -39,8 +39,57 @@ DISASSEMBLE:
   LD R0, TWELVE
   JSR RSHIFT
   ADD R4, R0, #0
-  
 
+  LEA R3, PARAMS
+  LD R0, NINE
+  LD R1, REG1_MASK
+  AND R1, R1, R5
+  JSR RSHIFT
+  STR R0, R3, #0
+
+  LD R0, ELEVEN
+  LD R1, BR_N_MASK
+  AND R1, R1, R5
+  JSR RSHIFT
+  STR R0, R3, #1
+
+  LD R0, TEN
+  LD R1, BR_Z_MASK
+  AND R1, R1, R5
+  JSR RSHIFT
+  STR R0, R3, #2
+
+  LD R0, NINE
+  LD R1, BR_P_MASK
+  AND R1, R1, R5
+  JSR RSHIFT
+  STR R0, R3, #3
+
+  LD R1, OFFSET11_MASK
+  AND R1, R1, R5
+  STR R1, R3, #4
+
+  LD R0, SIX
+  LD R1, REG2_MASK
+  AND R1, R1, R5
+  JSR RSHIFT
+  STR R0, R3, #5
+
+  LD R1, OFFSET9_MASK
+  AND R1, R1, R5
+  STR R1, R3, #6
+
+  LD R1, OFFSET6_MASK
+  AND R1, R1, R5
+  STR R1, R3, #7
+
+  LD R1, IMM5_MASK
+  AND R1, R1, R5
+  STR R1, R3, #8
+
+  LD R1, REG3_MASK
+  AND R1, R1, R5
+  STR R1, R3, #9
 
   ;valid_instruction resolution
   ;if we're here and valid instruction is still 0, ERROR
@@ -89,8 +138,9 @@ DISASSEMBLE:
   LD_LDI_LEA_ST_STI_PARAMS .FILL x41
   LDR_STR_PARAMS .FILL xA1
   NOT_PARAMS .FILL x21
-  RET_HALT .FILL x0
+  RET_HALT_NOP_PARAMS .FILL x0
 
+  PARAMS .BLKW #10
 
   ;opcode mask
   OPCODE_MASK .FILL xF000
