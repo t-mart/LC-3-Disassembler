@@ -40,6 +40,7 @@ DISASSEMBLE:
   JSR RSHIFT
   ADD R4, R0, #0
 
+  ;put every type of parameter into PARAMS[0-9]
   LEA R3, PARAMS
   LD R0, NINE
   LD R1, REG1_MASK
@@ -90,6 +91,107 @@ DISASSEMBLE:
   LD R1, REG3_MASK
   AND R1, R1, R5
   STR R1, R3, #9
+  
+  ;check if its add
+  LD R0, ADD_CODE
+  ADD R0, R0, R4
+  BRNP CHECK_AND
+  LEA R0, ADD_STRING
+  PUTS
+  BR DETERMINE_OPERAND2
+
+  ;check if its and
+  CHECK_AND
+  LD R0, AND_CODE
+  ADD R0, R0, R4
+  BRNP CHECK_BR
+  LEA R0, AND_STRING
+  PUTS
+
+  ;assign proper params code
+  DETERMINE_OPERAND2
+  LD R1, OPERAND2_FLAG_MASK
+  LD R0, FIVE
+  AND R1, R1, R5
+  JSR RSHIFT
+  BRZ SR2
+  LD R2, ADD_AND_IMM5_PARAMS
+
+  SR2
+  LD R2, ADD_AND_SR2_PARAMS
+
+  ;check if its BR
+  CHECK_BR
+  LD R0, BR_CODE
+  ADD R0, R0, R4
+  BRNP CHECK_JMP
+  LD R1, BR_CC_MASK
+  AND R1, R1, R5
+  LD R0, NINE
+  JSR RSHIFT
+  BRZ P_NOP
+  LEA R0, BR_STRING
+  PUTS
+  LD R2, BR_PARAMS
+  BR CHECK_JMP
+
+  P_NOP
+  LEA R0, NOP_STRING
+  PUTS
+  LD R2, RET_HALT_NOP_PARAMS
+ 
+ ;check if its jmp 
+  CHECK_JMP
+  LD R0, JMP_CODE
+  ADD R0, R0, R4
+  BRNP CHECK_JSR
+  LD R1, REG2_MASK
+  AND R1, R1, R5
+  LD R0, SIX
+  JSR RSHIFT
+  ADD R0, R0, #-7
+  BRZ P_RET
+  LEA R0, JMP_STRING
+  PUTS
+  LD R2, JMP_JSRR_PARAMS
+  BR CHECK_JSR
+
+  P_RET
+  LEA R0, RET_STRING
+  PUTS
+  LD R2, RET_HALT_NOP_PARAMS
+
+ ;check if its jsr
+  CHECK_JSR
+  LD R0, JSR_CODE
+  ADD R0, R0, R4
+  BRNP CHECK_LD
+  LD R1, JSR_FLAG_MASK
+  AND R1, R1, R5
+  LD R0, ELEVEN
+  JSR RSHIFT
+  BRZ P_JSRR
+  LEA R0, JSR_STRING
+  PUTS
+  LD R2, JSR_PARAMS
+  BR CHECK_LD
+
+  P_JSRR
+  LEA R0, JSRR_STRING
+  PUTS
+  LD R2, JMP_JSRR_PARAMS
+
+  CHECK_LD
+  CHECK_LDI
+  CHECK_LDR
+  CHECK_LEA
+  CHECK_NOT
+  CHECK_ST
+  CHECK_STI
+  CHECK_STR
+  CHECK_HALT
+
+  WRITE_PARAMS
 
   ;valid_instruction resolution
   ;if we're here and valid instruction is still 0, ERROR
@@ -162,7 +264,7 @@ DISASSEMBLE:
 
   ;jsr vs jsrr flag mask
   ;if 0, jsrr. if 1, jsr
-  JSR_FLAG_MASK .FILL x800 ; >> 7
+  JSR_FLAG_MASK .FILL x800 ; >> 11
 
   ;offset masks
   ;offset masks are always the least significant x bits
@@ -179,23 +281,23 @@ DISASSEMBLE:
   TRAP_VECTOR_MASK .FILL xFF
 
   
-  ;opcodes
-  ADD_CODE .FILL x1
-  AND_CODE .FILL x5
+  ;opcodes (NEGATED!)
+  ADD_CODE .FILL xFFFF
+  AND_CODE .FILL xFFFB
   BR_CODE .FILL x0
-  JMP_CODE .FILL xC
-  JSR_CODE .FILL x4
-  LD_CODE .FILL x2
-  LDI_CODE .FILL xA
-  LDR_CODE .FILL x6
-  LEA_CODE .FILL xE
-  NOT_CODE .FILL x9
-  RTI_CODE .FILL x8
-  ST_CODE .FILL x3
-  STI_CODE .FILL xB
-  STR_CODE .FILL x7
+  JMP_CODE .FILL xFFF4
+  JSR_CODE .FILL xFFFC
+  LD_CODE .FILL xFFFE
+  LDI_CODE .FILL xFFF6
+  LDR_CODE .FILL xFFFA
+  LEA_CODE .FILL xFFF2
+  NOT_CODE .FILL xFFF7
+  RTI_CODE .FILL xFFF8
+  ST_CODE .FILL xFFFD
+  STI_CODE .FILL xFFF5
+  STR_CODE .FILL xFFF9
   ;TRAP_CODE .FILL xF
-  HALT_CODE .FILL xF025 ; we only have 1 trap (xf---), and thats halt
+  HALT_CODE .FILL xFDB ; we only have 1 trap (xf---), and thats halt
 
   ;sentinel value
   SENTINEL .FILL xFFFF
