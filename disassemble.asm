@@ -114,6 +114,7 @@ DISASSEMBLE:
   LD R0, FIVE
   AND R1, R1, R5
   JSR RSHIFT
+  ADD R0, R0, #0
   BRZ SR2
   LD R2, ADD_AND_IMM5_PARAMS
   JSR WRITE_PARAMS
@@ -131,6 +132,7 @@ DISASSEMBLE:
   AND R1, R1, R5
   LD R0, NINE
   JSR RSHIFT
+  ADD R0, R0, #0
   BRZ P_NOP
   LEA R0, BR_STRING
   PUTS
@@ -174,6 +176,7 @@ DISASSEMBLE:
   AND R1, R1, R5
   LD R0, ELEVEN
   JSR RSHIFT
+  ADD R0, R0, #0
   BRZ P_JSRR
   LEA R0, JSR_STRING
   PUTS
@@ -310,7 +313,7 @@ DISASSEMBLE:
 
   ADD_AND_SR2_PARAMS .FILL x221
   ADD_AND_IMM5_PARAMS .FILL x121
-  BR_PARAMS .FILL x1E
+  BR_PARAMS .FILL x4E
   JMP_JSRR_PARAMS .FILL x20
   JSR_PARAMS .FILL x10
   LD_LDI_LEA_ST_STI_PARAMS .FILL x41
@@ -419,8 +422,168 @@ DISASSEMBLE:
   NEWLINE_STRING .STRINGZ "\n"
   SPACE_STRING .STRINGZ " "
   X_STRING .STRINGZ "x"
-  
+
+  GET_BACK_FINISH_DISASSEMBLE .FILL x0
+
   .END
+
+  WRITE_PARAMS
+  LEA R0, FINISH_DISASSEMBLE
+  ST R0, GET_BACK_FINISH_DISASSEMBLE
+  LEA R3, PARAMS
+  ;print reg1 
+  LD R1, ONE
+  AND R1, R1, R2
+  BRZ P_N
+  LEA R0, R_STRING
+  PUTS
+  LDR R0, R3, #0
+  JSR PRINT_NUM
+  LEA R0, COMMA_STRING
+  PUTS
+
+  P_N
+  ;shift param code
+  ADD R1, R2, #0
+  LD R0, ONE
+  JSR RSHIFT
+  ADD R2, R0, #0
+  ;print n
+  LD R1, ONE
+  AND R1, R1, R2
+  BRZ P_Z
+  LDR R0, R3, #1
+  BRZ P_Z
+  LEA R0, N_STRING
+  PUTS
+
+  P_Z
+  ;shift param code
+  ADD R1, R2, #0
+  LD R0, ONE
+  JSR RSHIFT
+  ADD R2, R0, #0
+  ;print z
+  LD R1, ONE
+  AND R1, R1, R2
+  BRZ P_P
+  LDR R0, R3, #2
+  BRZ P_P
+  LEA R0, Z_STRING
+  PUTS
+
+  P_P
+  ;shift param code
+  ADD R1, R2, #0
+  LD R0, ONE
+  JSR RSHIFT
+  ADD R2, R0, #0
+  ;print p
+  LD R1, ONE
+  AND R1, R1, R2
+  BRZ P_OFFSET11
+  LDR R0, R3, #3
+  BRZ P_OFFSET11
+  LEA R0, P_STRING
+  PUTS
+
+  P_OFFSET11
+  ;shift param code
+  ADD R1, R2, #0
+  LD R0, ONE
+  JSR RSHIFT
+  ADD R2, R0, #0
+  ;print offset11 (with a space before)
+  LD R1, ONE
+  AND R1, R1, R2
+  BRZ P_REG2
+  LEA R0, SPACE_STRING
+  PUTS
+  LDR R0, R3, #4
+  JSR PRINT_NUM
+
+  P_REG2
+  ;shift param code
+  ADD R1, R2, #0
+  LD R0, ONE
+  JSR RSHIFT
+  ADD R2, R0, #0
+  ;print reg2
+  LD R1, ONE
+  AND R1, R1, R2
+  BRZ P_OFFSET9
+  LEA R0, R_STRING
+  PUTS
+  LDR R0, R3, #5
+  JSR PRINT_NUM
+  LEA R0, COMMA_STRING
+  PUTS
+
+  P_OFFSET9
+  ;shift param code
+  ADD R1, R2, #0
+  LD R0, ONE
+  JSR RSHIFT
+  ADD R2, R0, #0
+  ;print offset9 (with a space before)
+  LD R1, ONE
+  AND R1, R1, R2
+  BRZ P_OFFSET6
+  LEA R0, SPACE_STRING
+  PUTS
+  LDR R0, R3, #6
+  JSR PRINT_NUM
+
+  P_OFFSET6
+  ;shift param code
+  ADD R1, R2, #0
+  LD R0, ONE
+  JSR RSHIFT
+  ADD R2, R0, #0
+  ;print offset6 (with a space before)
+  LD R1, ONE
+  AND R1, R1, R2
+  BRZ P_IMM5
+  LEA R0, SPACE_STRING
+  PUTS
+  LDR R0, R3, #7
+  JSR PRINT_NUM
+
+  P_IMM5
+  ;shift param code
+  ADD R1, R2, #0
+  LD R0, ONE
+  JSR RSHIFT
+  ADD R2, R0, #0
+  ;print imm5 (with a space before)
+  LD R1, ONE
+  AND R1, R1, R2
+  BRZ P_REG3
+  LEA R0, SPACE_STRING
+  PUTS
+  LDR R0, R3, #8
+  JSR PRINT_NUM
+
+  P_REG3
+  ;shift param code
+  ADD R1, R2, #0
+  LD R0, ONE
+  JSR RSHIFT
+  ADD R2, R0, #0
+  ;print reg3
+  LD R1, ONE
+  AND R1, R1, R2
+  BRZ FINISH_WRITE_PARAMS
+  LEA R0, R_STRING
+  PUTS
+  LDR R0, R3, #9
+  JSR PRINT_NUM
+
+  FINISH_WRITE_PARAMS
+
+  LD R0, GET_BACK_FINISH_DISASSEMBLE
+  JMP R0
+
 ;======do not edit this section=================================================
 
 ;; preconditions:
@@ -431,91 +594,91 @@ DISASSEMBLE:
 ;;  r0 <- r1 >> r0 (x >> y)
 ;;
 RSHIFT:
-.FILL x1DBE
-.FILL x7381
-.FILL x7580
-.FILL x54A0
-.FILL x14AF
-.FILL x14A1
-.FILL x903F
-.FILL x1021
-.FILL x1080
-.FILL x54A0
-.FILL x1482
-.FILL x5241
-.FILL x0601
-.FILL x14A1
-.FILL x1241
-.FILL x103F
-.FILL x03F9
-.FILL x10A0
-.FILL x6381
-.FILL x6580
-.FILL x1DA2
-.FILL x1020
-.FILL xC1C0
+.fill x1DBE
+.fill x7381
+.fill x7580
+.fill x54A0
+.fill x14AF
+.fill x14A1
+.fill x903F
+.fill x1021
+.fill x1080
+.fill x54A0
+.fill x1482
+.fill x5241
+.fill x0601
+.fill x14A1
+.fill x1241
+.fill x103F
+.fill x03F9
+.fill x10A0
+.fill x6381
+.fill x6580
+.fill x1DA2
+.fill xC1C0
 
-;; preconditions:
-;;  r0 contains the number you wish to print
+;; Preconditions:
+;;  R0 contains the number you wish to print
 ;;
-;; postconditions:
-;;  r0 still contains the number you wish to print
-;;  number printed to the console in hex.
+;; Postconditions:
+;;  R0 still contains the number you wish to print
+;;  Number printed to the console in HEX.
+
 PRINT_NUM:
-.FILL x5000
-.FILL x0A09
-.FILL x1DBE
-.FILL x7180
-.FILL x7F81
-.FILL x2019
-.FILL xF021
-.FILL x6180
-.FILL x6F81
-.FILL x1DA2
-.FILL xC1C0
-.FILL x1DBD
-.FILL x7180
-.FILL x7381
-.FILL x7F82
-.FILL x5000
-.FILL x0409
-.FILL x1220
-.FILL x5020
-.FILL x1024
-.FILL x4FD4
-.FILL x4FF5
-.FILL x1060
-.FILL x2208
-.FILL x5040
-.FILL x4807
-.FILL x6180
-.FILL x6381
-.FILL x6F82
-.FILL x1DA3
-.FILL xC1C0
-.FILL x0030
-.FILL x000F
-.FILL x1DBE
-.FILL x7180
-.FILL x7F81
-.FILL x1036
-.FILL x0606
-.FILL x102F
-.FILL x102F
-.FILL x102F
-.FILL x102D
-.FILL xF021
-.FILL x0E06
-.FILL x102F
-.FILL x102F
-.FILL x102F
-.FILL x102F
-.FILL x1025
-.FILL xF021
-.FILL x6180
-.FILL x6F81
-.FILL x1DA2
-.FILL xC1C0
+.fill x5000
+.fill x0A09
+.fill x1DBE
+.fill x7180
+.fill x7F81
+.fill x2019
+.fill xF021
+.fill x6180
+.fill x6F81
+.fill x1DA2
+.fill xC1C0
+.fill x1DBD
+.fill x7180
+.fill x7381
+.fill x7F82
+.fill x5000
+.fill x0409
+.fill x1220
+.fill x5020
+.fill x1024
+.fill x4FD5
+.fill x4FF5
+.fill x1060
+.fill x2208
+.fill x5040
+.fill x4807
+.fill x6180
+.fill x6381
+.fill x6F82
+.fill x1DA3
+.fill xC1C0
+.fill x0030
+.fill x000F
+.fill x1DBE
+.fill x7180
+.fill x7F81
+.fill x1036
+.fill x0606
+.fill x102F
+.fill x102F
+.fill x102F
+.fill x102D
+.fill xF021
+.fill x0E06
+.fill x102F
+.fill x102F
+.fill x102F
+.fill x102F
+.fill x1025
+.fill xF021
+.fill x6180
+.fill x6F81
+.fill x1DA2
+.fill xC1C0
 .END
 ;===============================================================================
 
