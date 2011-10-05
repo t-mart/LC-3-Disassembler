@@ -305,12 +305,6 @@ DISASSEMBLE:
   ;points to the instruction we're disassembling
   INSTRUCTION_PTR .FILL x5000
 
-  ;we'll force the opcode code to turn this on
-  ;if we get down to the bottom, and this hasn't been set, we've encountered
-  ;one of the no-no opcodes for this homework, such as rti, (reserved
-  ;opcode), or traps other than halt. in that case, write error
-  VALID_INSTRUCTION .FILL x0
-
   ADD_AND_SR2_PARAMS .FILL x221
   ADD_AND_IMM5_PARAMS .FILL x121
   BR_PARAMS .FILL x4E
