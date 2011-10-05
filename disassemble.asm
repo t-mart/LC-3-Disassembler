@@ -519,6 +519,11 @@ DISASSEMBLE:
   LD R0, JMP_CODE
   ADD R0, R0, R1
   BRZ P_OFFSET9
+  ;no comma after not reg2
+  ADD R1, R4, #0
+  LD R0, NOT_CODE
+  ADD R0, R0, R1
+  BRZ P_OFFSET9
 
   LEA R0, COMMA_STRING
   PUTS
