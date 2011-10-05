@@ -493,12 +493,10 @@ DISASSEMBLE:
   LD R0, ONE
   JSR RSHIFT
   ADD R2, R0, #0
-  ;print offset11 (with a space before)
+  ;print offset11
   LD R1, ONE
   AND R1, R1, R2
   BRZ P_REG2
-  LEA R0, SPACE_STRING
-  PUTS
   LDR R0, R3, #4
   JSR PRINT_NUM
 
