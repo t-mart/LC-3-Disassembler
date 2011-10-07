@@ -274,8 +274,6 @@ DISASSEMBLE:
   ;valid_instruction resolution
   ;if we're here and valid instruction is still 0, ERROR
   INVALID_INSTRUCTION
-  LD R0, VALID_INSTRUCTION
-  BRP FINISH_DISASSEMBLE
   LEA R0, ERROR_STRING
   PUTS
 
@@ -289,13 +287,7 @@ DISASSEMBLE:
   ADD R0, R0, #1
   ST R0, INSTRUCTION_PTR
 
-  ;set valid_instruction to 0(used to print ERROR if its an off limits opcode
-  LD R0, ZERO
-  ST R0, VALID_INSTRUCTION
-
   BR DISASSEMBLE_NEXT
-
-
 
   STOP_DISASSEMBLY
   HALT
