@@ -362,9 +362,6 @@ DISASSEMBLE:
   ;TRAP_CODE .FILL xF
   HALT_CODE .FILL xFDB ; we only have 1 trap (xf---), and thats halt
 
-  ;sentinel value
-  SENTINEL .FILL xFFFF
-
   ;constants
   ZERO .FILL x0
   ONE .FILL x1
