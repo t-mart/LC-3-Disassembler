@@ -27,10 +27,8 @@ DISASSEMBLE:
   LDI R5, INSTRUCTION_PTR
 
   ;check for sentinel
-  LD R0, SENTINEL
-  NOT R0, R0
-  ADD R0, R0, #1
-  ADD R0, R0, R5
+  ;just add 1, because xFFFF + 1 = x0
+  ADD R0, R5, #1
   BRZ STOP_DISASSEMBLY
 
   ;put opcode into R4
