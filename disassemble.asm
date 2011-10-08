@@ -38,242 +38,71 @@ DISASSEMBLE:
   JSR RSHIFT
   ADD R4, R0, #0
 
-  ;put every type of parameter into PARAMS[0-9]
-  LEA R3, PARAMS
-  LD R0, NINE
-  LD R1, REG1_MASK
-  AND R1, R1, R5
-  JSR RSHIFT
-  STR R0, R3, #0
-
-  LD R0, ELEVEN
-  LD R1, BR_N_MASK
-  AND R1, R1, R5
-  JSR RSHIFT
-  STR R0, R3, #1
-
-  LD R0, TEN
-  LD R1, BR_Z_MASK
-  AND R1, R1, R5
-  JSR RSHIFT
-  STR R0, R3, #2
-
-  LD R0, NINE
-  LD R1, BR_P_MASK
-  AND R1, R1, R5
-  JSR RSHIFT
-  STR R0, R3, #3
-
-  LD R1, OFFSET11_MASK
-  AND R1, R1, R5
-  STR R1, R3, #4
-
-  LD R0, SIX
-  LD R1, REG2_MASK
-  AND R1, R1, R5
-  JSR RSHIFT
-  STR R0, R3, #5
-
-  LD R1, OFFSET9_MASK
-  AND R1, R1, R5
-  STR R1, R3, #6
-
-  LD R1, OFFSET6_MASK
-  AND R1, R1, R5
-  STR R1, R3, #7
-
-  LD R1, IMM5_MASK
-  AND R1, R1, R5
-  STR R1, R3, #8
-
-  LD R1, REG3_MASK
-  AND R1, R1, R5
-  STR R1, R3, #9
+  JSR STORE_PARAMS
   
-  ;check if its add
-  LD R0, ADD_CODE
-  ADD R0, R0, R4
-  BRNP CHECK_AND
-  LEA R0, ADD_STRING
-  PUTS
-  BR DETERMINE_OPERAND2
+  AND R0, R0, #0
 
-  ;check if its and
-  CHECK_AND
-  LD R0, AND_CODE
-  ADD R0, R0, R4
-  BRNP CHECK_BR
-  LEA R0, AND_STRING
-  PUTS
+  ADD R4, R4, #0
+  BRP CHECK_ADD
+  JSR DISASM_BR
 
-  ;assign proper params code
-  DETERMINE_OPERAND2
-  LD R1, OPERAND2_FLAG_MASK
-  LD R0, FIVE
-  AND R1, R1, R5
-  JSR RSHIFT
-  ADD R0, R0, #0
-  BRZ SR2
-  LD R2, ADD_AND_IMM5_PARAMS
-  JSR WRITE_PARAMS
+  ADD R4, R4, #0
+  BRP CHECK_ADD
+  JSR DISASM_BR
 
-  SR2
-  LD R2, ADD_AND_SR2_PARAMS
-  JSR WRITE_PARAMS
+  ADD R4, R4, #0
+  BRP CHECK_ADD
+  JSR DISASM_BR
 
-  ;check if its BR
-  CHECK_BR
-  LD R0, BR_CODE
-  ADD R0, R0, R4
-  BRNP CHECK_JMP
-  LD R1, BR_CC_MASK
-  AND R1, R1, R5
-  LD R0, NINE
-  JSR RSHIFT
-  ADD R0, R0, #0
-  BRZ P_NOP
-  LEA R0, BR_STRING
-  PUTS
-  LD R2, BR_PARAMS
-  JSR WRITE_PARAMS
+  ADD R4, R4, #0
+  BRP CHECK_ADD
+  JSR DISASM_BR
 
-  P_NOP
-  LEA R0, NOP_STRING
-  PUTS
-  LD R2, RET_HALT_NOP_PARAMS
-  JSR WRITE_PARAMS
- 
- ;check if its jmp 
-  CHECK_JMP
-  LD R0, JMP_CODE
-  ADD R0, R0, R4
-  BRNP CHECK_JSR
-  LD R1, REG2_MASK
-  AND R1, R1, R5
-  LD R0, SIX
-  JSR RSHIFT
-  ADD R0, R0, #-7
-  BRZ P_RET
-  LEA R0, JMP_STRING
-  PUTS
-  LD R2, JMP_JSRR_PARAMS
-  JSR WRITE_PARAMS
+  ADD R4, R4, #0
+  BRP CHECK_ADD
+  JSR DISASM_BR
 
-  P_RET
-  LEA R0, RET_STRING
-  PUTS
-  LD R2, RET_HALT_NOP_PARAMS
-  JSR WRITE_PARAMS
+  ADD R4, R4, #0
+  BRP CHECK_ADD
+  JSR DISASM_BR
 
- ;check if its jsr
-  CHECK_JSR
-  LD R0, JSR_CODE
-  ADD R0, R0, R4
-  BRNP CHECK_LD
-  LD R1, JSR_FLAG_MASK
-  AND R1, R1, R5
-  LD R0, ELEVEN
-  JSR RSHIFT
-  ADD R0, R0, #0
-  BRZ P_JSRR
-  LEA R0, JSR_STRING
-  PUTS
-  LD R2, JSR_PARAMS
-  JSR WRITE_PARAMS
+  ADD R4, R4, #0
+  BRP CHECK_ADD
+  JSR DISASM_BR
 
-  P_JSRR
-  LEA R0, JSRR_STRING
-  PUTS
-  LD R2, JMP_JSRR_PARAMS
-  JSR WRITE_PARAMS
+  ADD R4, R4, #0
+  BRP CHECK_ADD
+  JSR DISASM_BR
 
-  CHECK_LD
-  LD R0, LD_CODE
-  ADD R0, R0, R4
-  BRNP CHECK_LDI
-  LEA R0, LD_STRING
-  PUTS
-  LD R2, LD_LDI_LEA_ST_STI_PARAMS
-  JSR WRITE_PARAMS
+  ADD R4, R4, #0
+  BRP CHECK_ADD
+  JSR DISASM_BR
 
-  CHECK_LDI
-  LD R0, LDI_CODE
-  ADD R0, R0, R4
-  BRNP CHECK_LDR
-  LEA R0, LDI_STRING
-  PUTS
-  LD R2, LD_LDI_LEA_ST_STI_PARAMS
-  JSR WRITE_PARAMS
-  
-  CHECK_LDR
-  LD R0, LDR_CODE
-  ADD R0, R0, R4
-  BRNP CHECK_LEA
-  LEA R0, LDR_STRING
-  PUTS
-  LD R2, LDR_STR_PARAMS
-  JSR WRITE_PARAMS
+  ADD R4, R4, #0
+  BRP CHECK_ADD
+  JSR DISASM_BR
 
-  CHECK_LEA
-  LD R0, LEA_CODE
-  ADD R0, R0, R4
-  BRNP CHECK_NOT
-  LEA R0, LEA_STRING
-  PUTS
-  LD R2, LD_LDI_LEA_ST_STI_PARAMS
-  JSR WRITE_PARAMS
+  ADD R4, R4, #0
+  BRP CHECK_ADD
+  JSR DISASM_BR
 
-  CHECK_NOT
-  LD R0, NOT_CODE
-  ADD R0, R0, R4
-  BRNP CHECK_ST
-  LEA R0, NOT_STRING
-  PUTS
-  LD R2, NOT_PARAMS
-  JSR WRITE_PARAMS
+  ADD R4, R4, #0
+  BRP CHECK_ADD
+  JSR DISASM_BR
 
-  CHECK_ST
-  LD R0, ST_CODE
-  ADD R0, R0, R4
-  BRNP CHECK_STI
-  LEA R0, ST_STRING
-  PUTS
-  LD R2, LD_LDI_LEA_ST_STI_PARAMS
-  JSR WRITE_PARAMS
+  ADD R4, R4, #0
+  BRP CHECK_ADD
+  JSR DISASM_BR
 
-
-  CHECK_STI
-  LD R0, STI_CODE
-  ADD R0, R0, R4
-  BRNP CHECK_STR
-  LEA R0, STI_STRING
-  PUTS
-  LD R2, LD_LDI_LEA_ST_STI_PARAMS
-  JSR WRITE_PARAMS
-
-  CHECK_STR
-  LD R0, STR_CODE
-  ADD R0, R0, R4
-  BRNP CHECK_HALT
-  LEA R0, STR_STRING
-  PUTS
-  LD R2, LDR_STR_PARAMS
-  JSR WRITE_PARAMS
-
-  CHECK_HALT
-  LD R0, HALT_CODE
-  ADD R0, R0, R5 ;R5 here becase only TRAP HALT is good, no other trap
-  BRNP INVALID_INSTRUCTION
-  LEA R0, HALT_STRING
-  PUTS
-  LD R2, RET_HALT_NOP_PARAMS
-  JSR WRITE_PARAMS
+  ADD R4, R4, #0
+  BRP CHECK_ADD
+  JSR DISASM_BR
 
   ;valid_instruction resolution
   ;if we're here and valid instruction is still 0, ERROR
-  INVALID_INSTRUCTION
-  LEA R0, ERROR_STRING
-  PUTS
+  ;INVALID_INSTRUCTION
+  ;LEA R0, ERROR_STRING
+  ;PUTS
 
   FINISH_DISASSEMBLE
   ;throw down a newline
@@ -290,6 +119,282 @@ DISASSEMBLE:
   STOP_DISASSEMBLY
   HALT
 
+PARAMS .BLKW #10
+
+STORE_PARAMS:
+;put every type of parameter into PARAMS[0-9]
+LEA R3, PARAMS
+LD R0, NINE
+LD R1, REG1_MASK
+AND R1, R1, R5
+JSR RSHIFT
+STR R0, R3, #0
+
+LD R0, ELEVEN
+LD R1, BR_N_MASK
+AND R1, R1, R5
+JSR RSHIFT
+STR R0, R3, #1
+
+LD R0, TEN
+LD R1, BR_Z_MASK
+AND R1, R1, R5
+JSR RSHIFT
+STR R0, R3, #2
+
+LD R0, NINE
+LD R1, BR_P_MASK
+AND R1, R1, R5
+JSR RSHIFT
+STR R0, R3, #3
+
+LD R1, OFFSET11_MASK
+AND R1, R1, R5
+STR R1, R3, #4
+
+LD R0, SIX
+LD R1, REG2_MASK
+AND R1, R1, R5
+JSR RSHIFT
+STR R0, R3, #5
+
+LD R1, OFFSET9_MASK
+AND R1, R1, R5
+STR R1, R3, #6
+
+LD R1, OFFSET6_MASK
+AND R1, R1, R5
+STR R1, R3, #7
+
+LD R1, IMM5_MASK
+AND R1, R1, R5
+STR R1, R3, #8
+
+LD R1, REG3_MASK
+AND R1, R1, R5
+STR R1, R3, #9
+RET
+
+
+GET_PARAM_R1 .FILL x0
+GET_PARAM:
+ST R1, GET_PARAM_R1
+LEA R1, PARAMS
+ADD R1, R1, R0
+LDR R0, R1, #0
+LD R1, GET_PARAM_R1
+RET
+
+X_CHAR .FILL x78
+PRINT_HEX_NUM_SAVE_R7 .FILL x0
+
+PRINT_HEX_NUM:
+LD R0, X_CHAR
+OUT
+ST R7, PRINT_HEX_NUM_SAVE_R7
+JSR PRINT_NUM
+LD R7, PRINT_HEC_NUM_SAVE_R7
+RET
+
+
+MAIN_R7 .FILL x0
+
+DISASM_BR
+;save r7 for later, it will get clobbered
+ST R7, MAIN_R7
+
+BR CC_SKIP
+
+CC_SPACE .BLKW #3
+
+CC_SKIP
+LD R2, CC_SPACE
+
+LD R0, ONE
+JSR GET_PARAM
+STR R0, R2, #0
+ADD R1, R1, R0
+
+LD R0, TWO
+JSR GET_PARAM
+STR R0, R2, #1
+ADD R1, R1, R0
+
+LD R0, THREE
+JSR GET_PARAM
+STR R0, R2, #2
+ADD R1, R1, R0
+
+BRP PRINT_BR
+
+LEA R0, NOP_STRING
+PUTS
+LD R7, MAIN_R7
+RET
+
+PRINT_BR
+LEA R0, BR_STRING
+PUTS
+
+LDR R0, R2, #0
+BRZ PRINT_Z
+LEA R0, N_STRING
+PUTS
+
+PRINT_Z
+LDR R0, R2, #1
+BRZ PRINT_P
+LEA R0, Z_STRING
+PUTS
+
+PRINT_P
+LDR R0, R2, #2
+BRZ PRINT_BR_OFFSET
+LEA R0, P_STRING
+PUTS
+
+PRINT_BR_OFFSET
+LD R0, SIX
+JSR GET_PARAM
+JSR PRINT_HEX_NUM
+RET
+.END
+
+DISASM_ADD
+
+RET
+
+DISASM_LD
+
+RET
+
+DISASM_ST
+
+RET
+
+DISASM_JSR_R
+
+RET
+
+DISASM_AND
+
+RET
+
+DISASM_LDR
+
+RET
+
+DISASM_STR
+
+RET
+
+DISASM_RTI
+
+RET
+
+DISASM_NOT
+
+RET
+
+DISASM_LDI
+
+RET
+
+DISASM_STI
+
+RET
+
+DISASM_JMP_RET
+
+RET
+
+DISASM_RESERVED
+
+RET
+
+DISASM_LEA
+
+RET
+
+DISASM_TRAP
+
+RET
+
+
+;destination/base and source register masks
+REG1_MASK .FILL xE00 ;the register found at bits 11 through 9
+REG2_MASK .FILL x1C0 ;the register found at bit 8 through 6
+REG3_MASK .FILL x7 ;the register found at bits 2 through 0
+
+;condition code masks
+BR_N_MASK .FILL x800 ; >> 11
+BR_Z_MASK .FILL x400 ; >> 10
+BR_P_MASK .FILL x200 ; >> 9
+
+;imm5 vs source register flag mask
+;if 0, using 2 registers. if 1, using a register and a imm5
+OPERAND2_FLAG_MASK .FILL x20 ; >> 5
+
+;jsr vs jsrr flag mask
+;if 0, jsrr. if 1, jsr
+JSR_FLAG_MASK .FILL x800 ; >> 11
+
+;offset masks
+;offset masks are always the least significant x bits
+OFFSET9_MASK .FILL x1FF
+OFFSET11_MASK .FILL x7FF
+OFFSET6_MASK .FILL x3F
+
+;imm5 mask
+;always lsb
+IMM5_MASK .FILL x1F
+
+;trap vector mask
+;always lsb
+TRAP_VECTOR_MASK .FILL xFF
+
+;opcode strings
+ADD_STRING .STRINGZ "ADD "
+AND_STRING .STRINGZ "AND "
+BR_STRING .STRINGZ "BR" ;no space after this because the cc come immediately after
+JMP_STRING .STRINGZ "JMP "
+JSR_STRING .STRINGZ "JSR "
+JSRR_STRING .STRINGZ "JSRR "
+LD_STRING .STRINGZ "LD "
+LDI_STRING .STRINGZ "LDI "
+LDR_STRING .STRINGZ "LDR "
+LEA_STRING .STRINGZ "LEA "
+NOT_STRING .STRINGZ "NOT "
+NOP_STRING .STRINGZ "NOP "
+RET_STRING .STRINGZ "RET "
+RTI_STRING .STRINGZ "RTI "
+ST_STRING .STRINGZ "ST "
+STI_STRING .STRINGZ "STI "
+STR_STRING .STRINGZ "STR "
+TRAP_STRING .STRINGZ "TRAP "
+
+;other strings
+N_STRING .STRINGZ "N"
+Z_STRING .STRINGZ "Z"
+P_STRING .STRINGZ "P"
+
+;constants
+ZERO .FILL x0
+ONE .FILL x1
+TWO .FILL x2
+THREE .FILL x3
+FIVE .FILL x5
+SIX .FILL x6
+NINE .FILL x9
+TEN .FILL xA
+ELEVEN .FILL xB
+FOUR_K .FILL x4000
+
+
+.END
+
+
+.END
   ;==================================CONTSTANTS================================
 
   ;points to the instruction we're disassembling
@@ -305,44 +410,11 @@ DISASSEMBLE:
   NOT_PARAMS .FILL x21
   RET_HALT_NOP_PARAMS .FILL x0
 
-  PARAMS .BLKW #10
-
   ;opcode mask
   OPCODE_MASK .FILL xF000
 
-  ;destination/base and source register masks
-  REG1_MASK .FILL xE00 ;the register found at bits 11 through 9
-  REG2_MASK .FILL x1C0 ;the register found at bit 8 through 6
-  REG3_MASK .FILL x7 ;the register found at bits 2 through 0
 
-  ;condition code masks
-  BR_CC_MASK .FILL xE00 ;the whole kitten kaboodle, >> 9
-  BR_N_MASK .FILL x800 ; >> 11
-  BR_Z_MASK .FILL x400 ; >> 10
-  BR_P_MASK .FILL x200 ; >> 9
-
-  ;imm5 vs source register flag mask
-  ;if 0, using 2 registers. if 1, using a register and a imm5
-  OPERAND2_FLAG_MASK .FILL x20 ; >> 5
-
-  ;jsr vs jsrr flag mask
-  ;if 0, jsrr. if 1, jsr
-  JSR_FLAG_MASK .FILL x800 ; >> 11
-
-  ;offset masks
-  ;offset masks are always the least significant x bits
-  OFFSET9_MASK .FILL x1FF
-  OFFSET11_MASK .FILL x7FF
-  OFFSET6_MASK .FILL x3F
-
-  ;imm5 mask
-  ;always lsb
-  IMM5_MASK .FILL x1F
-
-  ;trap vector mask
-  ;always lsb
-  TRAP_VECTOR_MASK .FILL xFF
-
+  TWELVE .FILL xC
   
   ;opcodes (NEGATED!)
   ADD_CODE .FILL xFFFF
@@ -362,40 +434,7 @@ DISASSEMBLE:
   ;TRAP_CODE .FILL xF
   HALT_CODE .FILL xFDB ; we only have 1 trap (xf---), and thats halt
 
-  ;constants
-  ZERO .FILL x0
-  ONE .FILL x1
-  FIVE .FILL x5
-  SIX .FILL x6
-  NINE .FILL x9
-  TEN .FILL xA
-  ELEVEN .FILL xB
-  TWELVE .FILL xC
 
-  ;opcode strings
-  ADD_STRING .STRINGZ "ADD "
-  AND_STRING .STRINGZ "AND "
-  BR_STRING .STRINGZ "BR" ;no space after this because the cc come immediately after
-  JMP_STRING .STRINGZ "JMP "
-  JSR_STRING .STRINGZ "JSR "
-  JSRR_STRING .STRINGZ "JSRR "
-  LD_STRING .STRINGZ "LD "
-  LDI_STRING .STRINGZ "LDI "
-  LDR_STRING .STRINGZ "LDR "
-  LEA_STRING .STRINGZ "LEA "
-  NOT_STRING .STRINGZ "NOT "
-  NOP_STRING .STRINGZ "NOP "
-  RET_STRING .STRINGZ "RET "
-  RTI_STRING .STRINGZ "RTI "
-  ST_STRING .STRINGZ "ST "
-  STI_STRING .STRINGZ "STI "
-  STR_STRING .STRINGZ "STR "
-  TRAP_STRING .STRINGZ "TRAP "
-
-  ;other strings
-  N_STRING .STRINGZ "N"
-  Z_STRING .STRINGZ "Z"
-  P_STRING .STRINGZ "P"
   COMMA_STRING .STRINGZ ", "
   HALT_STRING .STRINGZ "HALT"
   R_STRING .STRINGZ "R" ;as in register, r1, r2, ...
@@ -404,191 +443,8 @@ DISASSEMBLE:
   SPACE_STRING .STRINGZ " "
   X_STRING .STRINGZ "x"
 
-  GET_BACK_FINISH_DISASSEMBLE .FILL x0
 
   .END
-
-  WRITE_PARAMS
-  LEA R0, FINISH_DISASSEMBLE
-  ST R0, GET_BACK_FINISH_DISASSEMBLE
-  LEA R3, PARAMS
-  ;print reg1 
-  LD R1, ONE
-  AND R1, R1, R2
-  BRZ P_N
-  LEA R0, R_STRING
-  PUTS
-  LDR R0, R3, #0
-  JSR PRINT_NUM
-  LEA R0, COMMA_STRING
-  PUTS
-
-  P_N
-  ;shift param code
-  ADD R1, R2, #0
-  LD R0, ONE
-  JSR RSHIFT
-  ADD R2, R0, #0
-  ;print n
-  LD R1, ONE
-  AND R1, R1, R2
-  BRZ P_Z
-  LDR R0, R3, #1
-  BRZ P_Z
-  LEA R0, N_STRING
-  PUTS
-
-  P_Z
-  ;shift param code
-  ADD R1, R2, #0
-  LD R0, ONE
-  JSR RSHIFT
-  ADD R2, R0, #0
-  ;print z
-  LD R1, ONE
-  AND R1, R1, R2
-  BRZ P_P
-  LDR R0, R3, #2
-  BRZ P_P
-  LEA R0, Z_STRING
-  PUTS
-
-  P_P
-  ;shift param code
-  ADD R1, R2, #0
-  LD R0, ONE
-  JSR RSHIFT
-  ADD R2, R0, #0
-  ;print p
-  LD R1, ONE
-  AND R1, R1, R2
-  BRZ P_OFFSET11
-  LDR R0, R3, #3
-  BRZ P_OFFSET11
-  LEA R0, P_STRING
-  PUTS
-
-  P_OFFSET11
-  ;shift param code
-  ADD R1, R2, #0
-  LD R0, ONE
-  JSR RSHIFT
-  ADD R2, R0, #0
-  ;print offset11
-  LD R1, ONE
-  AND R1, R1, R2
-  BRZ P_REG2
-  LEA R0, X_STRING
-  PUTS
-  LDR R0, R3, #4
-  JSR PRINT_NUM
-
-  P_REG2
-  ;shift param code
-  ADD R1, R2, #0
-  LD R0, ONE
-  JSR RSHIFT
-  ADD R2, R0, #0
-  ;print reg2
-  LD R1, ONE
-  AND R1, R1, R2
-  BRZ P_OFFSET9
-  LEA R0, R_STRING
-  PUTS
-  LDR R0, R3, #5
-  JSR PRINT_NUM
-  ;no comma after jmp reg2
-  ADD R1, R4, #0
-  LD R0, JMP_CODE
-  ADD R0, R0, R1
-  BRZ P_OFFSET9
-  ;no comma after not reg2
-  ADD R1, R4, #0
-  LD R0, NOT_CODE
-  ADD R0, R0, R1
-  BRZ P_OFFSET9
-  ;no comma after jsr reg2
-  ADD R1, R4, #0
-  LD R0, JSR_CODE
-  ADD R0, R0, R1
-  BRZ P_OFFSET9
-
-  LEA R0, COMMA_STRING
-  PUTS
-
-  P_OFFSET9
-  ;shift param code
-  ADD R1, R2, #0
-  LD R0, ONE
-  JSR RSHIFT
-  ADD R2, R0, #0
-  ;print offset9 (with a space before)
-  LD R1, ONE
-  AND R1, R1, R2
-  BRZ P_OFFSET6
-  ;space only for BR
-  ADD R1, R4, #0
-  LD R0, BR_CODE
-  ADD R0, R0, R1
-  BRNP OFFSET9_SKIP_SPACE
-  LEA R0, SPACE_STRING
-  PUTS
-  OFFSET9_SKIP_SPACE
-  LEA R0, X_STRING
-  PUTS
-  LDR R0, R3, #6
-  JSR PRINT_NUM
-
-  P_OFFSET6
-  ;shift param code
-  ADD R1, R2, #0
-  LD R0, ONE
-  JSR RSHIFT
-  ADD R2, R0, #0
-  ;print offset6
-  LD R1, ONE
-  AND R1, R1, R2
-  BRZ P_IMM5
-  LEA R0, X_STRING
-  PUTS
-  LDR R0, R3, #7
-  JSR PRINT_NUM
-
-  P_IMM5
-  ;shift param code
-  ADD R1, R2, #0
-  LD R0, ONE
-  JSR RSHIFT
-  ADD R2, R0, #0
-  ;print imm5
-  LD R1, ONE
-  AND R1, R1, R2
-  BRZ P_REG3
-  LEA R0, X_STRING
-  PUTS
-  LDR R0, R3, #8
-  JSR PRINT_NUM
-
-  P_REG3
-  ;shift param code
-  ADD R1, R2, #0
-  LD R0, ONE
-  JSR RSHIFT
-  ADD R2, R0, #0
-  ;print reg3
-  LD R1, ONE
-  AND R1, R1, R2
-  BRZ FINISH_WRITE_PARAMS
-  LEA R0, R_STRING
-  PUTS
-  LDR R0, R3, #9
-  JSR PRINT_NUM
-
-  FINISH_WRITE_PARAMS
-
-  LD R0, GET_BACK_FINISH_DISASSEMBLE
-  JMP R0
-
 ;======do not edit this section=================================================
 
 ;; preconditions:
@@ -684,15 +540,15 @@ PRINT_NUM:
 .fill x6F81
 .fill x1DA2
 .fill xC1C0
-.END
 ;===============================================================================
+
 
 ;instructions to disassemble.  put things here to test them.
 .ORIG x5000
-  .FILL x100F
-  .FILL x102F
-  .FILL x500F
-  .FILL x502F
+  ;.FILL x100F
+  ;.FILL x102F
+  ;.FILL x500F
+  ;.FILL x502F
   .FILL x0E00
   .FILL x027C
   .FILL x0463
@@ -702,22 +558,22 @@ PRINT_NUM:
   .FILL x0CFD
   .FILL x0E64
   .FILL x00B2
-  .FILL xC180
-  .FILL xC1C0
-  .FILL x49C0
-  .FILL x41C0
-  .FILL x284F
-  .FILL xA84D
-  .FILL x684D
-  .FILL xEA0D
-  .FILL x9A3F
-  .FILL x8000
-  .FILL x86AF
-  .FILL x3A34
-  .FILL xBA34
-  .FILL x7A34
-  .FILL xF025
-  .FILL xF024
+  ;.FILL xC180
+  ;.FILL xC1C0
+  ;.FILL x49C0
+  ;.FILL x41C0
+  ;.FILL x284F
+  ;.FILL xA84D
+  ;.FILL x684D
+  ;.FILL xEA0D
+  ;.FILL x9A3F
+  ;.FILL x8000
+  ;.FILL x86AF
+  ;.FILL x3A34
+  ;.FILL xBA34
+  ;.FILL x7A34
+  ;.FILL xF025
+  ;.FILL xF024
   .FILL xFFFF
 .END
 
